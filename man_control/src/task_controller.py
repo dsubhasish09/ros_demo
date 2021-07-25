@@ -248,5 +248,5 @@ class Task_Controller(object):
  
 if __name__ == '__main__':
     rospy.init_node('torque_commander')#start node
-    task=Task_Controller(debug=True)#initialize controller
+    task=Task_Controller()#initialize controller
     task.control_loop()#start torque computation loop
