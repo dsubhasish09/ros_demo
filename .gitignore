@@ -1,9 +1,7 @@
 man_urdf/export.log
 man_control/src/*.pickle
-man_control/src/task_controller.py
 man_control/src/__pycache__/
 man_control/src/data_plot.pickle
 man_control/src/control_func_test.py
 man_control/src/*.png
-man_control/src/task_trajectory_generator.py
 man_control/src/plotter.py
