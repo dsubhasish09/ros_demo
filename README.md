@@ -1,5 +1,5 @@
 # ros_demo
-This is a demo package for testing new ideas in ROS
+These are demo packages for testing new ideas in ROS
 ## man_urdf
 This is the ROS package having the URDF of a puma type 6 DOF serial chain manipulator. Some launch files have been added for basic visualization.
 ## man_control
