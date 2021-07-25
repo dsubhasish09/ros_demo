@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robot name="man_control" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:include filename="$(find man_control)/urdf/template.xacro" />
+<xacro:controllib/>
+<xacro:include filename="$(find man_urdf)/urdf/man_urdf.urdf" />
+<xacro:gazebo_link link="L0"/>
+<xacro:gazebo_link link="L1"/>
+<xacro:gazebo_link link="L2"/>
+<xacro:gazebo_link link="L3"/>
+<xacro:gazebo_link link="L4"/>
+<xacro:gazebo_link link="L5"/>
+<xacro:gazebo_link link="L6"/>
+<xacro:gazebo_transmission joint="J1" gear_ratio="100"/>
+<xacro:gazebo_transmission joint="J2" gear_ratio="100"/>
+<xacro:gazebo_transmission joint="J3" gear_ratio="100"/>
+<xacro:gazebo_transmission joint="J4" gear_ratio="100"/>
+<xacro:gazebo_transmission joint="J5" gear_ratio="100"/>
+<xacro:gazebo_transmission joint="J6" gear_ratio="100"/>
+</robot>

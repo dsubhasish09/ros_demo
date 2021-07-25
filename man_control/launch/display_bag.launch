@@ -1,0 +1,15 @@
+<launch>
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <param name="robot_description"
+    command="$(find xacro)/xacro --inorder '$(find man_control)/urdf/man_control.xacro'" />
+  <param name="use_sim_time"
+    type="bool"
+    value="true"/>
+  <node name="playback" pkg="rosbag" type="play" args="$(find man_control)/bagfiles/recording.bag"/>
+
+  <node
+    name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find man_control)/rviz/urdf.rviz" />
+</launch>

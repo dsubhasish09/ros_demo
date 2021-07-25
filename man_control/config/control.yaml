@@ -1,0 +1,13 @@
+manipulator:
+ joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 200
+ group_effort_controller:
+  type: effort_controllers/JointGroupEffortController
+  joints:
+    - J1
+    - J2
+    - J3
+    - J4
+    - J5
+    - J6

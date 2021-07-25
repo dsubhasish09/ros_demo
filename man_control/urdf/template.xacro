@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!-- Revolute-Revolute Manipulator -->
+<robot name="template" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+  <xacro:macro name="controllib">
+    <gazebo>
+      <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
+        <robotNamespace>/manipulator</robotNamespace>
+        <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="gazebo_link" params="link">
+    <gazebo reference="${link}">
+      <selfCollide>true</selfCollide>
+      <collision><surface><bounce>
+        <restitution_coefficient>0.2</restitution_coefficient>
+      </bounce></surface></collision>
+    </gazebo>
+  </xacro:macro>
+
+
+  <xacro:macro name="gazebo_transmission" params="joint gear_ratio=1">
+    <transmission name="${joint}_transmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${joint}">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${joint}_motor">
+        <mechanicalReduction>${gear_ratio}</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,9 @@
+<launch><rosparam file="$(find man_control)/config/control.yaml" command="load"/>"
+<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/manipulator" args="joint_state_controller
+group_effort_controller"/>
+<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+<remap from="/joint_states" to="/manipulator/joint_states" />
+<param name="publish_frequency" value="200" type="double"/>
+</node>
+<node pkg="tf2_ros" type="static_transform_publisher" name="tool_tip_broadcaster" args="0 0 0.25722535 0 0 0 1 /L6 /tool_tip"/>
+</launch>
