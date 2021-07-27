@@ -26,8 +26,7 @@ inv=np.linalg.inv#inverse
 pinv=np.linalg.pinv
 
 def tilda(p:np.ndarray)->np.ndarray:
-    """
-    Returns the 3x3 skew-symmetric matix corresponding to the cross-product
+    """Returns the 3x3 skew-symmetric matix corresponding to the cross-product
     operation for a given 3x1 vector.
 
     Parameters
@@ -41,13 +40,13 @@ def tilda(p:np.ndarray)->np.ndarray:
          3x3 skew-symmetric matix corresponding to the cross-product operation
 
     """
+    
     til=np.array([[0,-p[2],p[1]],[p[2],0,-p[0]],[-p[1],p[0],0]],dtype=np.float64)
     return til
 
 
 def inv_tilda(til:np.ndarray)->np.ndarray:
-    """
-    Inverse function of the tilda function
+    """Inverse function of the tilda function
 
     Parameters
     ----------
@@ -60,6 +59,7 @@ def inv_tilda(til:np.ndarray)->np.ndarray:
          3x1 vector corresponding to the input skew-symmetric matrix
 
     """
+    
     p=np.zeros((3,1),dtype=np.float64)
     p[0]=-til[1,2]
     p[1]=til[0,2]
@@ -67,8 +67,7 @@ def inv_tilda(til:np.ndarray)->np.ndarray:
     return p
 
 def tilda6(P:np.ndarray)->np.ndarray:
-    """
-    Tilda operation used in Spatial Vector Algebra.
+    """Tilda operation used in Spatial Vector Algebra.
 
     Parameters
     ---------- 
@@ -79,8 +78,8 @@ def tilda6(P:np.ndarray)->np.ndarray:
     -------
     til : numpy.ndarray of shape (6,6)
          6x6 matrix corresponding to tilda operation on P
-
     """
+    
     x=P[0:3]
     y=P[3:6]
     x_tilda=tilda(x)
@@ -92,8 +91,7 @@ def tilda6(P:np.ndarray)->np.ndarray:
     return til
 
 def Rx(theta:float)->np.ndarray:
-    """
-    Returns rotation matrix for a rotation about x axis by theta radians
+    """Returns rotation matrix for a rotation about x axis by theta radians
 
     Parameters
     ----------
@@ -106,14 +104,14 @@ def Rx(theta:float)->np.ndarray:
          3x3 Rotation Matrix
 
     """
+    
     R=np.array([[1,0,0],
                 [0,cos(theta),-sin(theta)],
                 [0,sin(theta),cos(theta)]],dtype=np.float64)
     return R
 
 def Ry(theta:float)->np.ndarray:
-    """
-    Returns rotation matrix for a rotation about y axis by theta radians
+    """Returns rotation matrix for a rotation about y axis by theta radians
 
     Parameters
     ----------
@@ -126,14 +124,14 @@ def Ry(theta:float)->np.ndarray:
          Rotation Matrix
 
     """
+    
     R=np.array([[cos(theta),0,sin(theta)],
                 [0,1,0],
                 [-sin(theta),0,cos(theta)]],dtype=np.float64)
     return R
 
 def Rz(theta:float)->np.ndarray:
-    """
-    Returns rotation matrix for a rotation about z axis by theta radians
+    """Returns rotation matrix for a rotation about z axis by theta radians
 
     Parameters
     ----------
@@ -146,14 +144,14 @@ def Rz(theta:float)->np.ndarray:
          Rotation Matrix
 
     """
+    
     R=np.array([[cos(theta),-sin(theta),0],
                 [sin(theta),cos(theta),0],
                 [0,0,1]],dtype=np.float64)
     return R
 
 def phi_link(d:float,a:float,alpha:float)->np.ndarray:
-    """
-    Returns Rigid body transformation matrix corresponding to DH parameters d,a and alpha
+    """Returns Rigid body transformation matrix corresponding to DH parameters d,a and alpha
 
     Parameters
     ----------
@@ -170,6 +168,7 @@ def phi_link(d:float,a:float,alpha:float)->np.ndarray:
          Rigid Body Transformation Matrix
 
     """
+    
     R=Rx(alpha)
     l=[a,-d*sin(alpha),d*cos(alpha)]
     l_tilda=tilda(l)
@@ -180,8 +179,7 @@ def phi_link(d:float,a:float,alpha:float)->np.ndarray:
     return phi_l
 
 def phi_hinge(theta:float)->np.ndarray:
-    """
-    Returns Rigid body transformation matrix corresponding to DH parameter theta
+    """Returns Rigid body transformation matrix corresponding to DH parameter theta
 
     Parameters
     ----------
@@ -194,6 +192,7 @@ def phi_hinge(theta:float)->np.ndarray:
          Rigid Body Transformation Matrix
 
     """
+    
     R=Rz(theta)
     phi_h=np.zeros((6,6),dtype=np.float64)
     phi_h[0:3,0:3]=R
@@ -202,8 +201,7 @@ def phi_hinge(theta:float)->np.ndarray:
 
 
 def get_phi(alpha:np.ndarray,a:np.ndarray,theta0:np.ndarray,theta:np.ndarray,d:np.ndarray,a0:float,alpha0:float)->np.ndarray:
-    """
-    Returns a list of combined rigid body transformation matrixes for all 12 joints in the Half-humanoid
+    """Returns a list of combined rigid body transformation matrixes for all 12 joints in the Half-humanoid
 
     Parameters
     ----------
@@ -227,7 +225,6 @@ def get_phi(alpha:np.ndarray,a:np.ndarray,theta0:np.ndarray,theta:np.ndarray,d:n
     phis : numpy.ndarray of shape (6,6,6)
          array of Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
         phi_i-1_i for i=1 to 6. 
-
     """
 
     phis_l=np.zeros((6,6,6))
@@ -242,8 +239,7 @@ def get_phi(alpha:np.ndarray,a:np.ndarray,theta0:np.ndarray,theta:np.ndarray,d:n
     return phis,phis_l,phis_h
 
 def get_cummulative_phi(phis:np.ndarray)->np.ndarray:
-    """
-    Returns a array of cummulative rigid body transformation matrices.
+    """Returns a array of cummulative rigid body transformation matrices.
 
     Parameters
     ----------
@@ -257,6 +253,7 @@ def get_cummulative_phi(phis:np.ndarray)->np.ndarray:
         phi_i-1_6 for i=1 to 6. 
 
     """
+    
     cphis=np.zeros((6,6,6))
     cphis[5,:,:]=phis[5,:,:]
     for i in [4,3,2,1,0]:
@@ -265,8 +262,7 @@ def get_cummulative_phi(phis:np.ndarray)->np.ndarray:
     return cphis
 
 def pos_from_phi(phi:np.ndarray)->np.ndarray:
-    """
-    returns the position coordinates from a rigid body transformation matrix
+    """returns the position coordinates from a rigid body transformation matrix
 
     Parameters
     ----------
@@ -279,17 +275,18 @@ def pos_from_phi(phi:np.ndarray)->np.ndarray:
          numpy array of shape (3,1) which is the position coordinates from phi
 
     """
+    
     pos=inv_tilda(np.matmul(phi[0:3,3:6],phi[0:3,0:3].T))
     return pos
 
 
 def create_IM(link)->Tuple[float,np.ndarray,np.ndarray]:
-    """
-    Gets the mass-inertia properties of the link from the Robot Description (URDF) loaded in the ROS parameter server
+    """Gets the mass-inertia properties of the link from the Robot Description (URDF) loaded in the ROS parameter server
     returns a tuple of the form (m,COM,I)
     where m is the mass of the link
     COM is the coordinates of the Centre of Mass of the link in terms of the link frame
     I is the inertia tensor w.r.t the link frames
+    
     Parameters
     ----------
     link : URDF.Link
@@ -305,6 +302,7 @@ def create_IM(link)->Tuple[float,np.ndarray,np.ndarray]:
          Inertia Tensor in terms of the link frame
 
     """
+    
     link=link[0]
     ixx=link.inertial.inertia.ixx
     ixy=link.inertial.inertia.ixy
@@ -330,8 +328,7 @@ def create_IM(link)->Tuple[float,np.ndarray,np.ndarray]:
     return m,COM.flatten(),I
 
 def get_SM(m:list,COMs:np.ndarray,IMs:list)->list:
-    """
-    returns SMs the list of 6 Link Spatial Inertia matrices.
+    """returns SMs the list of 6 Link Spatial Inertia matrices.
     SMs[0]-SMs[5] are the Spatial Inertias of links 1-6.
 
     Parameters
@@ -349,6 +346,7 @@ def get_SM(m:list,COMs:np.ndarray,IMs:list)->list:
          list of 12 Spatial Inertia Matrices.
 
     """
+    
     SMs=[]
     for i in range(len(m)):
         SM=np.zeros((6,6),dtype=np.float64)
@@ -362,8 +360,7 @@ def get_SM(m:list,COMs:np.ndarray,IMs:list)->list:
 
 
 def compute_D(SMs:list, phis:np.ndarray,H:np.ndarray)->np.ndarray:
-    """
-    returns the 6x6 Joint Space Inertia Matrix D computed using the Composite Rigid Body Algorithm
+    """returns the 6x6 Joint Space Inertia Matrix D computed using the Composite Rigid Body Algorithm
 
     Parameters
     ----------
@@ -380,6 +377,7 @@ def compute_D(SMs:list, phis:np.ndarray,H:np.ndarray)->np.ndarray:
          6x6 Joint Space Inertia Matrix
 
     """
+    
     D=np.zeros((6,6),dtype=np.float64)
     R=np.zeros((6,6))
     F=np.zeros((6,1))
@@ -403,8 +401,8 @@ def compute_D(SMs:list, phis:np.ndarray,H:np.ndarray)->np.ndarray:
     return D
 
 def forward_sweep(theta0:np.ndarray,theta:np.ndarray,dtheta:np.ndarray,phis:np.ndarray,H:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray]:
-    """
-    Carries out the forward sweep of the Recursive Newton Euler Algorithm
+    """Carries out the forward sweep of the Recursive Newton Euler Algorithm
+    
     Parameters
     ----------
     theta0 : numpy.ndarray of shape (6,1)
@@ -428,6 +426,7 @@ def forward_sweep(theta0:np.ndarray,theta:np.ndarray,dtheta:np.ndarray,phis:np.n
          array of 12 link spatial acceleration due to gravity
 
     """
+    
     V=np.zeros((6,6,1))
     A=np.zeros((6,6,1))
     g=np.zeros((6,6,1))
@@ -459,8 +458,8 @@ def forward_sweep(theta0:np.ndarray,theta:np.ndarray,dtheta:np.ndarray,phis:np.n
     return V,A,g
 
 def reverse_sweep(phis:np.ndarray,SMs:list,m:list,V:np.ndarray,A:np.ndarray,g:np.ndarray,H:np.ndarray,COMs:np.ndarray)->np.ndarray:
-    """
-    Carries out the forward sweep of the Recursive Newton Euler Algorithm
+    """Carries out the forward sweep of the Recursive Newton Euler Algorithm
+    
     Parameters
     ----------
     phis : numpy.ndarray of shape (6,6,6)
@@ -486,6 +485,7 @@ def reverse_sweep(phis:np.ndarray,SMs:list,m:list,V:np.ndarray,A:np.ndarray,g:np
          Vector of Generalised Centripetal, Coriolis and Gravity forces
    
     """
+    
     F0=np.zeros((6,1))
     CG=np.zeros((6,1))
     
@@ -521,8 +521,7 @@ def reverse_sweep(phis:np.ndarray,SMs:list,m:list,V:np.ndarray,A:np.ndarray,g:np
     return CG
 
 def get_DH(joints:np.ndarray,joint_names:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray]:
-    """
-    Gets the DH parameters from the Robot Description (URDF) loaded in the ROS parameter server
+    """Gets the DH parameters from the Robot Description (URDF) loaded in the ROS parameter server
     
     Parameters
     ----------
@@ -577,8 +576,7 @@ def get_DH(joints:np.ndarray,joint_names:np.ndarray)->Tuple[np.ndarray,np.ndarra
     return a,alpha,d,theta0
 
 def euler2omega_jacobian(alpha:float,beta:float,gamma:float)->np.ndarray:
-    """
-    returns the 3x3 Jacobian Matrix for converting angular velocities to Euler Angle Rates for the ZYZ Euler Angles
+    """returns the 3x3 Jacobian Matrix for converting angular velocities to Euler Angle Rates for the ZYZ Euler Angles
 
     Parameters
     ----------
@@ -595,6 +593,7 @@ def euler2omega_jacobian(alpha:float,beta:float,gamma:float)->np.ndarray:
          3x3 Jacobian Matrix for converting angular velocities to Euler Angle Rates for the ZYZ Euler Angles
 
     """
+    
     Te = np.array([[0, -sin(alpha), cos(alpha)*sin(beta)],
                      [0, cos(alpha), sin(alpha)*sin(beta)],
                      [1, 0, cos(beta)]])
@@ -602,8 +601,7 @@ def euler2omega_jacobian(alpha:float,beta:float,gamma:float)->np.ndarray:
 
 
 def geometric2analytic_jacobian(euler:np.ndarray)->np.ndarray:
-    """
-    returns the 6x6 matrix which needs to be post multiplied by the Geometric Jacobian 
+    """returns the 6x6 matrix which needs to be post multiplied by the Geometric Jacobian 
     for converting it into Analytical Jacobian for use with ZYZ Euler Angles
 
     Parameters
@@ -618,6 +616,7 @@ def geometric2analytic_jacobian(euler:np.ndarray)->np.ndarray:
         of a single side for converting it into Analytical Jacobian for use with ZYZ Euler Angles
 
     """
+    
     alpha=euler[0,0]
     beta=euler[1,0]
     gamma=euler[2,0]
@@ -628,8 +627,7 @@ def geometric2analytic_jacobian(euler:np.ndarray)->np.ndarray:
     return Ta_inv
 
 def geometric_jacobian(cphis:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray]:
-    """
-    returns the 6x6 Geometric Jacobian.
+    """returns the 6x6 Geometric Jacobian.
 
     Parameters
     ----------
@@ -642,6 +640,7 @@ def geometric_jacobian(cphis:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray
          6x6 Geometric Jacobian.
 
     """
+    
     J_=np.zeros((6,6),dtype=np.float64)
     R=cphis[0,0:3,0:3]
     R06=np.zeros((6,6),dtype=np.float64)
@@ -653,9 +652,8 @@ def geometric_jacobian(cphis:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray
     return J,J_,R06
     
 def joint2task(theta:np.ndarray)->np.ndarray:
-    """
+    """Converts Joint Space Coordinates to Task Space Coordinates for the ZYZ Euler Angle Representation of Orientation
     
-    Converts Joint Space Coordinates to Task Space Coordinates for the ZYZ Euler Angle Representation of Orientation
     Parameters
     ----------
     theta : numpy.ndarray of shape (6,1)
@@ -665,8 +663,8 @@ def joint2task(theta:np.ndarray)->np.ndarray:
     -------
     X : numpy.ndarray of shape (6,1)
          Task Space Coordinate
-
     """
+    
     X=np.zeros((6,1))
     phis=get_phi(alpha,a,theta0,theta,d,a0,alpha0)[0]
     cphis=get_cummulative_phi(phis)
@@ -677,8 +675,7 @@ def joint2task(theta:np.ndarray)->np.ndarray:
     return X
 
 def dphis_dq(theta:np.ndarray,phis_l:np.ndarray,n:int=6)->np.ndarray:
-    """
-    returns 3D matrix of stacked derivative of rigid body transformation matrices wrt respective joint variable
+    """returns 3D matrix of stacked derivative of rigid body transformation matrices wrt respective joint variable
 
     Parameters
     ----------
@@ -703,8 +700,7 @@ def dphis_dq(theta:np.ndarray,phis_l:np.ndarray,n:int=6)->np.ndarray:
     return dphis
 
 def dphih_dq(j:int,q:float)->np.ndarray:
-    """
-    returns derivative of hinge rigid body transformation matrix wrt the respective joint angle.
+    """returns derivative of hinge rigid body transformation matrix wrt the respective joint angle.
 
     Parameters
     ----------
@@ -717,8 +713,8 @@ def dphih_dq(j:int,q:float)->np.ndarray:
     -------
     dphi_h : np.ndarray of shape (6,6)
         derivative of hinge rigid body transformation matrix wrt the respective joint angle.
-
-    """    
+    """   
+    
     theta=q+theta0[j-1]
     R=np.array([[-sin(theta),-cos(theta),0],
                 [cos(theta),-sin(theta),0],
@@ -728,8 +724,7 @@ def dphih_dq(j:int,q:float)->np.ndarray:
     return dphi_h
 
 def dTe(euler:np.ndarray,deuler:np.ndarray)->np.ndarray:
-    """
-    returns time derivative of Te
+    """returns time derivative of Te
 
     Parameters
     ----------
@@ -744,6 +739,7 @@ def dTe(euler:np.ndarray,deuler:np.ndarray)->np.ndarray:
         time derivative of Te
 
     """
+    
     alpha=euler[0,0]
     beta=euler[1,0]
     gamma=euler[2,0]
@@ -758,8 +754,7 @@ def dTe(euler:np.ndarray,deuler:np.ndarray)->np.ndarray:
     return DTE
 
 def dJi_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int,i:int)->np.ndarray:
-    """
-    returns time derivative of i'th column of J_hat
+    """returns time derivative of i'th column of J_hat
 
     Parameters
     ----------
@@ -782,6 +777,7 @@ def dJi_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int
         time derivative of the i'th column of J_hat
 
     """
+    
     phi_p=np.zeros((n-i,1,6))
     phi_p[0]=H
     phi_s=np.zeros((n-i,6,6))
@@ -793,8 +789,8 @@ def dJi_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int
     return dj_
 
 def dJ_dt_(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int)->np.ndarray:
-    """
-    returns time derivative of J_hat
+    """returns time derivative of J_hat
+    
     Parameters
     ----------
     phis : np.ndarray of shape (n,6,6)
@@ -814,14 +810,14 @@ def dJ_dt_(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int
         time derivative of J_hat.
 
     """
+    
     dJ_=np.zeros((6,n))
     for i in range(1,n):
         dJ_[:,i-1]=dJi_dt(phis,dphis,cphis,dq,n,i)
     return dJ_
 
 def dR_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int)->np.ndarray:
-    """
-    returns time derivative of R0n
+    """returns time derivative of R0n
 
     Parameters
     ----------
@@ -842,6 +838,7 @@ def dR_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int)
         time derivative of R0n.
 
     """
+    
     R_p=np.zeros((n,3,3))
     R_p[0]=np.eye(3)
     for k in range(1,n):
@@ -855,8 +852,7 @@ def dR_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int)
     return dR
 
 def dJ_dt(J_:np.ndarray,R06:np.ndarray,phis:np.ndarray,phis_l:np.ndarray,cphis:np.ndarray,q:np.ndarray,dq:np.ndarray,n:int)->np.ndarray:
-    """
-    returns time derivative of geometric jacobian
+    """returns time derivative of geometric jacobian
 
     Parameters
     ----------
@@ -883,6 +879,7 @@ def dJ_dt(J_:np.ndarray,R06:np.ndarray,phis:np.ndarray,phis_l:np.ndarray,cphis:n
         time derivative of geometric jacobian
 
     """
+    
     dphis=dphis_dq(q,phis_l,n)
     dJ_=dJ_dt_(phis,dphis,cphis,dq,n)
     dR=dR_dt(phis,dphis,cphis,dq,n)
