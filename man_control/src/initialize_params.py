@@ -3,8 +3,25 @@
 """
 Created on Tue Mar 24 18:40:24 2020
 
-@author: kuttus09
+@author: dsubhasish
+
+This script automates the creation of xacro files, config files and launch files
+required for starting the simulation in Gazebo and loading the necessary control
+interfaces for retrieving joint state information from Gazebo and sending command
+torque messages to Gazebo. This is achieved by the following three steps-
+
+1) combines the urdf extracted from CAD within the man_urdf packahe with additional 
+gazebo and transmission tags. Defines the control plugin. Resulting xacro file is 
+man_control/urdf/man_control.xacro
+
+2) defines the controller to be used and also the joint state publisher from gazebo.
+This is written within man_control/config/control.yaml
+
+3) writes a launch file for loading the controller and control interfaces and also
+starts a robot state publisher along with some additional static transform publshers 
+for visualization in RViz
 """
+
 #Defining Link Names
 print("Initializing paramaters...")
 links=["L0","L1","L2","L3","L4","L5","L6"]
