@@ -16,18 +16,50 @@ from control_func import *#control functions, kinematic and mass-inertia paramet
 
 
 class Joint_Controller(object):
-    """
-    Implementation of Joint Space Inverse Dynamics Controller
+    """Implementation of the Joint Space Inverse Dynamics Controller
+    
+    This controller object receives current joint state messages from 
+    /manipulator/joint_states topic and the desired joint trajectory from the
+    /theta_desired topic. It then computes the command torque by means of 
+    Inverse dynamics and sends the computed torque to Gazebo through the
+    /manipulator/group_effort_controller/command topic.
+
+    Attributes
+    ----------
+    traj : np.ndarray of shape (18,1)
+        The desired joint space trajectory (position, velocity and acceleration).
+    theta : np.ndarray of shape (6,1)
+        Current joint angle vector.
+    dtheta : np.ndarray of shape (6,1)
+        Current joint velocity vector
+    traj_sub : rospy.Subscriber
+        Subscriber of desired joint trajectory topic (/theta_desired).
+    joint_state_sub : rospy.Subscriber
+        Subscriber of current joint state topic (/manipulator/joint_states).
+    torque_pub : rospy.Publisher
+        Publisher of computed command torque to the /manipulator/group_effort_controller/command topic.
+    Kp : float
+        Kp gain.
+    Kd : float
+        Kd gain.
+    msg : Float64MultiArray
+        Torque message to be sent through /manipulator/group_effort_controller/command.
+    rate : int
+        Frequency at which to publish command torque. Reciprocal of control sampling interval
+
     """
     def __init__(self,Kp=100,Kd=20):
         """
-        Initializes the Joint_Controller Object
+        Initializes the joint state controller and Starts the torque computation loop.
 
-        Returns
-        -------
-        None.
-
+        Parameters
+        ----------
+        Kp : float
+            Kd gain.. The default is 100.
+        Kd : float
+            Kd gain. The default is 20.
         """
+        
         #self.traj is a 6x1 numpy.ndarray used for storing desired joint angle, joint velocity and joint acceleration
         self.traj=np.zeros((18,1))
         self.traj[0:6]=np.array([[0,pi/3,-pi/2,0,pi/3,0]]).T#initial configuration
@@ -62,6 +94,7 @@ class Joint_Controller(object):
         None.
 
         """
+        
         self.traj=np.array(msg.data).reshape((18,1))
 
     def update_state(self,msg):
@@ -79,6 +112,7 @@ class Joint_Controller(object):
         None.
 
         """
+        
         theta=msg.position
         dtheta=msg.velocity
 
@@ -89,7 +123,7 @@ class Joint_Controller(object):
 
     def send_torque(self):
         """
-        computes the command joint torque and publishes to /hhumanoid/group_effort_controller/command
+        Computes the command joint torque and publishes to /hhumanoid/group_effort_controller/command
         loops till node is shut down
 
         Returns
@@ -97,6 +131,7 @@ class Joint_Controller(object):
         None.
 
         """
+        
         while not rospy.is_shutdown():
             #take desired trajectory 
             traj=self.traj

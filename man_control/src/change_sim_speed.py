@@ -4,7 +4,22 @@
 Created on Tue Jun  8 21:50:09 2021
 
 @author: dsubhasish
+
+This script uses one of the services offered by Gazebo, namely 
+/gazebo/set_physics_properties to slow down the rate of simulation
+update within Gazebo. The idea is to slow down the simulation sufficiently
+so that the command torque computation can be completed within the simulated 
+control sampling interval. Currently configured such that simulation is carried 
+out with time step of 0.001s and control sampling interval being 0.005s. The 
+required Real time factor is given as argument to the script. For example 
+consider that it takes maximum of 0.05s (of physical time) for one iteration of 
+the control algorithm. This means that the simulated control interval of 0.005s
+needs to be slowed down 10 times in order for the control computation to be
+done within the simulated control sampling interval. This implies an RTF of 1/10
+=0.1 as the argument to this script. This will be called through any of the launch
+files so that the simulation starts up in this slowed down mode.
 """
+
 import rospy
 from gazebo_msgs.srv import SetPhysicsProperties
 from geometry_msgs.msg import Vector3
