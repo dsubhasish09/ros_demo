@@ -9,6 +9,7 @@ Some common functions which will be used across multiple files, classes and file
 Also loads up the mass-inertia and kinematic parameters from the URDF.
 Should be imported individually in every python file.
 """
+
 import numpy as np#numpy
 # cimport numpy as np
 import rospy#for interfacing with ROS
@@ -895,14 +896,28 @@ joint_names=np.array([j.name for j in robot.joints]) #list of joint names
 joints=np.array(robot.joints) #list of URDF.Joint
 
 H=np.array([[0,0,1,0,0,0]],dtype=np.float64) #Hinge Map Matrix
+"""Hinge Map Matrix for a revolute joint"""
+
 a0=0 #link length for base link
+"""Link length for base link"""
+
 alpha0=0 #link twist for base link
-a,alpha,d,theta0=get_DH(joints,joint_names)#get DH parameters
+"""Link twist for base link"""
 
+a=np.zeros((6,1))
+"""array of DH parameters a"""
+alpha=np.zeros((6,1))
+"""array of DH parameters alpha"""
+d=np.zeros((6,1))
+"""array of DH parameters d"""
+theta0=np.zeros((6,1))
+"""array of nominal joint angles"""
+a[:,:],alpha[:,:],d[:,:],theta0[:,:]=get_DH(joints,joint_names)#get DH parameters
 
-
-#rigid body transformation matrices for Hand Centres
+#rigid body transformation matrices from #6 to end effector frame
 phi6_ef=np.zeros((6,6),dtype=np.float64)
+"""rigid body transformation matrices from #6 to end effector frame"""
+
 phi6_ef[0:3,3:6]=tilda([0,0,0.25722535])
 phi6_ef[0:3,0:3]=phi6_ef[3:6,3:6]=np.eye(3)
 
@@ -910,10 +925,14 @@ phi6_ef[0:3,0:3]=phi6_ef[3:6,3:6]=np.eye(3)
 #initializing mass-inertia properties of the half humanoid
 print("Initializing Mass-Inertia properties of the Half Humanoid")
 m=6*[0] #list of link masses
+"""list of link masses"""
 COMs=np.zeros((3,6),dtype=np.float64) #list of link centre of mass
+"""array of link centre of masses"""
 IMs=6*[0] #list of Inertia Tensor
+"""list of link rotational inertias"""
 
 for i in range(1,7):
     m[i-1],COMs[:,i-1],IMs[i-1]=create_IM(links[link_names=='L'+str(i)])
 
 SMs=get_SM(m,COMs,IMs)#spatial inertias
+"""list of link spatial inertias"""

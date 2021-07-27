@@ -42,6 +42,7 @@ Some common functions which will be used across multiple files, classes and file
 Also loads up the mass-inertia and kinematic parameters from the URDF.
 Should be imported individually in every python file.
 &#34;&#34;&#34;
+
 import numpy as np#numpy
 # cimport numpy as np
 import rospy#for interfacing with ROS
@@ -928,14 +929,28 @@ joint_names=np.array([j.name for j in robot.joints]) #list of joint names
 joints=np.array(robot.joints) #list of URDF.Joint
 
 H=np.array([[0,0,1,0,0,0]],dtype=np.float64) #Hinge Map Matrix
+&#34;&#34;&#34;Hinge Map Matrix for a revolute joint&#34;&#34;&#34;
+
 a0=0 #link length for base link
+&#34;&#34;&#34;Link length for base link&#34;&#34;&#34;
+
 alpha0=0 #link twist for base link
-a,alpha,d,theta0=get_DH(joints,joint_names)#get DH parameters
+&#34;&#34;&#34;Link twist for base link&#34;&#34;&#34;
 
+a=np.zeros((6,1))
+&#34;&#34;&#34;array of DH parameters a&#34;&#34;&#34;
+alpha=np.zeros((6,1))
+&#34;&#34;&#34;array of DH parameters alpha&#34;&#34;&#34;
+d=np.zeros((6,1))
+&#34;&#34;&#34;array of DH parameters d&#34;&#34;&#34;
+theta0=np.zeros((6,1))
+&#34;&#34;&#34;array of nominal joint angles&#34;&#34;&#34;
+a[:,:],alpha[:,:],d[:,:],theta0[:,:]=get_DH(joints,joint_names)#get DH parameters
 
-
-#rigid body transformation matrices for Hand Centres
+#rigid body transformation matrices from #6 to end effector frame
 phi6_ef=np.zeros((6,6),dtype=np.float64)
+&#34;&#34;&#34;rigid body transformation matrices from #6 to end effector frame&#34;&#34;&#34;
+
 phi6_ef[0:3,3:6]=tilda([0,0,0.25722535])
 phi6_ef[0:3,0:3]=phi6_ef[3:6,3:6]=np.eye(3)
 
@@ -943,18 +958,73 @@ phi6_ef[0:3,0:3]=phi6_ef[3:6,3:6]=np.eye(3)
 #initializing mass-inertia properties of the half humanoid
 print(&#34;Initializing Mass-Inertia properties of the Half Humanoid&#34;)
 m=6*[0] #list of link masses
+&#34;&#34;&#34;list of link masses&#34;&#34;&#34;
 COMs=np.zeros((3,6),dtype=np.float64) #list of link centre of mass
+&#34;&#34;&#34;array of link centre of masses&#34;&#34;&#34;
 IMs=6*[0] #list of Inertia Tensor
+&#34;&#34;&#34;list of link rotational inertias&#34;&#34;&#34;
 
 for i in range(1,7):
     m[i-1],COMs[:,i-1],IMs[i-1]=create_IM(links[link_names==&#39;L&#39;+str(i)])
 
-SMs=get_SM(m,COMs,IMs)#spatial inertias</code></pre>
+SMs=get_SM(m,COMs,IMs)#spatial inertias
+&#34;&#34;&#34;list of link spatial inertias&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="control_func.COMs"><code class="name">var <span class="ident">COMs</span></code></dt>
+<dd>
+<div class="desc"><p>array of link centre of masses</p></div>
+</dd>
+<dt id="control_func.H"><code class="name">var <span class="ident">H</span></code></dt>
+<dd>
+<div class="desc"><p>Hinge Map Matrix for a revolute joint</p></div>
+</dd>
+<dt id="control_func.IMs"><code class="name">var <span class="ident">IMs</span></code></dt>
+<dd>
+<div class="desc"><p>list of link rotational inertias</p></div>
+</dd>
+<dt id="control_func.SMs"><code class="name">var <span class="ident">SMs</span></code></dt>
+<dd>
+<div class="desc"><p>list of link spatial inertias</p></div>
+</dd>
+<dt id="control_func.a"><code class="name">var <span class="ident">a</span></code></dt>
+<dd>
+<div class="desc"><p>array of DH parameters a</p></div>
+</dd>
+<dt id="control_func.a0"><code class="name">var <span class="ident">a0</span></code></dt>
+<dd>
+<div class="desc"><p>Link length for base link</p></div>
+</dd>
+<dt id="control_func.alpha"><code class="name">var <span class="ident">alpha</span></code></dt>
+<dd>
+<div class="desc"><p>array of DH parameters alpha</p></div>
+</dd>
+<dt id="control_func.alpha0"><code class="name">var <span class="ident">alpha0</span></code></dt>
+<dd>
+<div class="desc"><p>Link twist for base link</p></div>
+</dd>
+<dt id="control_func.d"><code class="name">var <span class="ident">d</span></code></dt>
+<dd>
+<div class="desc"><p>array of DH parameters d</p></div>
+</dd>
+<dt id="control_func.m"><code class="name">var <span class="ident">m</span></code></dt>
+<dd>
+<div class="desc"><p>list of link masses</p></div>
+</dd>
+<dt id="control_func.phi6_ef"><code class="name">var <span class="ident">phi6_ef</span></code></dt>
+<dd>
+<div class="desc"><p>rigid body transformation matrices from #6 to end effector frame</p></div>
+</dd>
+<dt id="control_func.theta0"><code class="name">var <span class="ident">theta0</span></code></dt>
+<dd>
+<div class="desc"><p>array of nominal joint angles</p></div>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
@@ -2505,6 +2575,22 @@ Input spatial vector</p>
 <ul></ul>
 </div>
 <ul id="index">
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="two-column">
+<li><code><a title="control_func.COMs" href="#control_func.COMs">COMs</a></code></li>
+<li><code><a title="control_func.H" href="#control_func.H">H</a></code></li>
+<li><code><a title="control_func.IMs" href="#control_func.IMs">IMs</a></code></li>
+<li><code><a title="control_func.SMs" href="#control_func.SMs">SMs</a></code></li>
+<li><code><a title="control_func.a" href="#control_func.a">a</a></code></li>
+<li><code><a title="control_func.a0" href="#control_func.a0">a0</a></code></li>
+<li><code><a title="control_func.alpha" href="#control_func.alpha">alpha</a></code></li>
+<li><code><a title="control_func.alpha0" href="#control_func.alpha0">alpha0</a></code></li>
+<li><code><a title="control_func.d" href="#control_func.d">d</a></code></li>
+<li><code><a title="control_func.m" href="#control_func.m">m</a></code></li>
+<li><code><a title="control_func.phi6_ef" href="#control_func.phi6_ef">phi6_ef</a></code></li>
+<li><code><a title="control_func.theta0" href="#control_func.theta0">theta0</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="control_func.Rx" href="#control_func.Rx">Rx</a></code></li>
