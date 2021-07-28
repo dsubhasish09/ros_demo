@@ -33,5 +33,3 @@ Contains the stl files corresponding to the visual and collision mesh for the di
 Contains the yaml file which has the configuration for the controller to be loaded. 
 ## launch 
 Contains launch files to start simulation.
-## texture
-Contains any texture which has been defined for visualization of any link. Currently not populated.
