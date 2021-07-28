@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>control_func API documentation</title>
+<title>src.control_func API documentation</title>
 <meta name="description" content="Created on Sat May 16 17:57:27 2020 …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>control_func</code></h1>
+<h1 class="title">Module <code>src.control_func</code></h1>
 </header>
 <section id="section-intro">
 <p>Created on Sat May 16 17:57:27 2020</p>
@@ -982,51 +982,51 @@ SMs=get_SM(m,COMs,IMs)#spatial inertias
 <section>
 <h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
-<dt id="control_func.COMs"><code class="name">var <span class="ident">COMs</span></code></dt>
+<dt id="src.control_func.COMs"><code class="name">var <span class="ident">COMs</span></code></dt>
 <dd>
 <div class="desc"><p>array of link centre of masses</p></div>
 </dd>
-<dt id="control_func.H"><code class="name">var <span class="ident">H</span></code></dt>
+<dt id="src.control_func.H"><code class="name">var <span class="ident">H</span></code></dt>
 <dd>
 <div class="desc"><p>Hinge Map Matrix for a revolute joint</p></div>
 </dd>
-<dt id="control_func.IMs"><code class="name">var <span class="ident">IMs</span></code></dt>
+<dt id="src.control_func.IMs"><code class="name">var <span class="ident">IMs</span></code></dt>
 <dd>
 <div class="desc"><p>list of link rotational inertias</p></div>
 </dd>
-<dt id="control_func.SMs"><code class="name">var <span class="ident">SMs</span></code></dt>
+<dt id="src.control_func.SMs"><code class="name">var <span class="ident">SMs</span></code></dt>
 <dd>
 <div class="desc"><p>list of link spatial inertias</p></div>
 </dd>
-<dt id="control_func.a"><code class="name">var <span class="ident">a</span></code></dt>
+<dt id="src.control_func.a"><code class="name">var <span class="ident">a</span></code></dt>
 <dd>
 <div class="desc"><p>array of DH parameters a</p></div>
 </dd>
-<dt id="control_func.a0"><code class="name">var <span class="ident">a0</span></code></dt>
+<dt id="src.control_func.a0"><code class="name">var <span class="ident">a0</span></code></dt>
 <dd>
 <div class="desc"><p>Link length for base link</p></div>
 </dd>
-<dt id="control_func.alpha"><code class="name">var <span class="ident">alpha</span></code></dt>
+<dt id="src.control_func.alpha"><code class="name">var <span class="ident">alpha</span></code></dt>
 <dd>
 <div class="desc"><p>array of DH parameters alpha</p></div>
 </dd>
-<dt id="control_func.alpha0"><code class="name">var <span class="ident">alpha0</span></code></dt>
+<dt id="src.control_func.alpha0"><code class="name">var <span class="ident">alpha0</span></code></dt>
 <dd>
 <div class="desc"><p>Link twist for base link</p></div>
 </dd>
-<dt id="control_func.d"><code class="name">var <span class="ident">d</span></code></dt>
+<dt id="src.control_func.d"><code class="name">var <span class="ident">d</span></code></dt>
 <dd>
 <div class="desc"><p>array of DH parameters d</p></div>
 </dd>
-<dt id="control_func.m"><code class="name">var <span class="ident">m</span></code></dt>
+<dt id="src.control_func.m"><code class="name">var <span class="ident">m</span></code></dt>
 <dd>
 <div class="desc"><p>list of link masses</p></div>
 </dd>
-<dt id="control_func.phi6_ef"><code class="name">var <span class="ident">phi6_ef</span></code></dt>
+<dt id="src.control_func.phi6_ef"><code class="name">var <span class="ident">phi6_ef</span></code></dt>
 <dd>
 <div class="desc"><p>rigid body transformation matrices from #6 to end effector frame</p></div>
 </dd>
-<dt id="control_func.theta0"><code class="name">var <span class="ident">theta0</span></code></dt>
+<dt id="src.control_func.theta0"><code class="name">var <span class="ident">theta0</span></code></dt>
 <dd>
 <div class="desc"><p>array of nominal joint angles</p></div>
 </dd>
@@ -1035,7 +1035,7 @@ SMs=get_SM(m,COMs,IMs)#spatial inertias
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="control_func.Rx"><code class="name flex">
+<dt id="src.control_func.Rx"><code class="name flex">
 <span>def <span class="ident">Rx</span></span>(<span>theta: float) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1075,7 +1075,7 @@ SMs=get_SM(m,COMs,IMs)#spatial inertias
     return R</code></pre>
 </details>
 </dd>
-<dt id="control_func.Ry"><code class="name flex">
+<dt id="src.control_func.Ry"><code class="name flex">
 <span>def <span class="ident">Ry</span></span>(<span>theta: float) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1115,7 +1115,7 @@ SMs=get_SM(m,COMs,IMs)#spatial inertias
     return R</code></pre>
 </details>
 </dd>
-<dt id="control_func.Rz"><code class="name flex">
+<dt id="src.control_func.Rz"><code class="name flex">
 <span>def <span class="ident">Rz</span></span>(<span>theta: float) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1155,7 +1155,7 @@ SMs=get_SM(m,COMs,IMs)#spatial inertias
     return R</code></pre>
 </details>
 </dd>
-<dt id="control_func.compute_D"><code class="name flex">
+<dt id="src.control_func.compute_D"><code class="name flex">
 <span>def <span class="ident">compute_D</span></span>(<span>SMs: list, phis: numpy.ndarray, H: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1220,7 +1220,7 @@ SMs=get_SM(m,COMs,IMs)#spatial inertias
     return D</code></pre>
 </details>
 </dd>
-<dt id="control_func.create_IM"><code class="name flex">
+<dt id="src.control_func.create_IM"><code class="name flex">
 <span>def <span class="ident">create_IM</span></span>(<span>link) ‑> Tuple[float, numpy.ndarray, numpy.ndarray]</span>
 </code></dt>
 <dd>
@@ -1295,7 +1295,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return m,COM.flatten(),I</code></pre>
 </details>
 </dd>
-<dt id="control_func.dJ_dt"><code class="name flex">
+<dt id="src.control_func.dJ_dt"><code class="name flex">
 <span>def <span class="ident">dJ_dt</span></span>(<span>J_: numpy.ndarray, R06: numpy.ndarray, phis: numpy.ndarray, phis_l: numpy.ndarray, cphis: numpy.ndarray, q: numpy.ndarray, dq: numpy.ndarray, n: int) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1364,7 +1364,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return dJ</code></pre>
 </details>
 </dd>
-<dt id="control_func.dJ_dt_"><code class="name flex">
+<dt id="src.control_func.dJ_dt_"><code class="name flex">
 <span>def <span class="ident">dJ_dt_</span></span>(<span>phis: numpy.ndarray, dphis: numpy.ndarray, cphis: numpy.ndarray, dq: numpy.ndarray, n: int) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1420,7 +1420,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return dJ_</code></pre>
 </details>
 </dd>
-<dt id="control_func.dJi_dt"><code class="name flex">
+<dt id="src.control_func.dJi_dt"><code class="name flex">
 <span>def <span class="ident">dJi_dt</span></span>(<span>phis: numpy.ndarray, dphis: numpy.ndarray, cphis: numpy.ndarray, dq: numpy.ndarray, n: int, i: int) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1485,7 +1485,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return dj_</code></pre>
 </details>
 </dd>
-<dt id="control_func.dR_dt"><code class="name flex">
+<dt id="src.control_func.dR_dt"><code class="name flex">
 <span>def <span class="ident">dR_dt</span></span>(<span>phis: numpy.ndarray, dphis: numpy.ndarray, cphis: numpy.ndarray, dq: numpy.ndarray, n: int) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1548,7 +1548,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return dR</code></pre>
 </details>
 </dd>
-<dt id="control_func.dTe"><code class="name flex">
+<dt id="src.control_func.dTe"><code class="name flex">
 <span>def <span class="ident">dTe</span></span>(<span>euler: numpy.ndarray, deuler: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1600,7 +1600,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return DTE</code></pre>
 </details>
 </dd>
-<dt id="control_func.dphih_dq"><code class="name flex">
+<dt id="src.control_func.dphih_dq"><code class="name flex">
 <span>def <span class="ident">dphih_dq</span></span>(<span>j: int, q: float) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1646,7 +1646,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return dphi_h</code></pre>
 </details>
 </dd>
-<dt id="control_func.dphis_dq"><code class="name flex">
+<dt id="src.control_func.dphis_dq"><code class="name flex">
 <span>def <span class="ident">dphis_dq</span></span>(<span>theta: numpy.ndarray, phis_l: numpy.ndarray, n: int = 6) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1695,7 +1695,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return dphis</code></pre>
 </details>
 </dd>
-<dt id="control_func.euler2omega_jacobian"><code class="name flex">
+<dt id="src.control_func.euler2omega_jacobian"><code class="name flex">
 <span>def <span class="ident">euler2omega_jacobian</span></span>(<span>alpha: float, beta: float, gamma: float) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1743,7 +1743,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return Te</code></pre>
 </details>
 </dd>
-<dt id="control_func.forward_sweep"><code class="name flex">
+<dt id="src.control_func.forward_sweep"><code class="name flex">
 <span>def <span class="ident">forward_sweep</span></span>(<span>theta0: numpy.ndarray, theta: numpy.ndarray, dtheta: numpy.ndarray, phis: numpy.ndarray, H: numpy.ndarray) ‑> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]</span>
 </code></dt>
 <dd>
@@ -1832,7 +1832,7 @@ I is the inertia tensor w.r.t the link frames</p>
     return V,A,g</code></pre>
 </details>
 </dd>
-<dt id="control_func.geometric2analytic_jacobian"><code class="name flex">
+<dt id="src.control_func.geometric2analytic_jacobian"><code class="name flex">
 <span>def <span class="ident">geometric2analytic_jacobian</span></span>(<span>euler: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -1880,7 +1880,7 @@ of a single side for converting it into Analytical Jacobian for use with ZYZ Eul
     return Ta_inv</code></pre>
 </details>
 </dd>
-<dt id="control_func.geometric_jacobian"><code class="name flex">
+<dt id="src.control_func.geometric_jacobian"><code class="name flex">
 <span>def <span class="ident">geometric_jacobian</span></span>(<span>cphis: numpy.ndarray) ‑> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]</span>
 </code></dt>
 <dd>
@@ -1925,7 +1925,7 @@ of a single side for converting it into Analytical Jacobian for use with ZYZ Eul
     return J,J_,R06</code></pre>
 </details>
 </dd>
-<dt id="control_func.get_DH"><code class="name flex">
+<dt id="src.control_func.get_DH"><code class="name flex">
 <span>def <span class="ident">get_DH</span></span>(<span>joints: numpy.ndarray, joint_names: numpy.ndarray) ‑> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]</span>
 </code></dt>
 <dd>
@@ -2006,7 +2006,7 @@ numpy array of shape (6,1) having the nominal joint angle for joints i=1 to 6</p
     return a,alpha,d,theta0</code></pre>
 </details>
 </dd>
-<dt id="control_func.get_SM"><code class="name flex">
+<dt id="src.control_func.get_SM"><code class="name flex">
 <span>def <span class="ident">get_SM</span></span>(<span>m: list, COMs: numpy.ndarray, IMs: list) ‑> list</span>
 </code></dt>
 <dd>
@@ -2061,7 +2061,7 @@ SMs[0]-SMs[5] are the Spatial Inertias of links 1-6.</p>
     return SMs    </code></pre>
 </details>
 </dd>
-<dt id="control_func.get_cummulative_phi"><code class="name flex">
+<dt id="src.control_func.get_cummulative_phi"><code class="name flex">
 <span>def <span class="ident">get_cummulative_phi</span></span>(<span>phis: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2105,7 +2105,7 @@ phi_i-1_6 for i=1 to 6.</dd>
     return cphis</code></pre>
 </details>
 </dd>
-<dt id="control_func.get_phi"><code class="name flex">
+<dt id="src.control_func.get_phi"><code class="name flex">
 <span>def <span class="ident">get_phi</span></span>(<span>alpha: numpy.ndarray, a: numpy.ndarray, theta0: numpy.ndarray, theta: numpy.ndarray, d: numpy.ndarray, a0: float, alpha0: float) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2188,7 +2188,7 @@ phi_i-1_i for i=1 to 6.</dd>
     return phis,phis_l,phis_h</code></pre>
 </details>
 </dd>
-<dt id="control_func.inv_tilda"><code class="name flex">
+<dt id="src.control_func.inv_tilda"><code class="name flex">
 <span>def <span class="ident">inv_tilda</span></span>(<span>til: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2229,7 +2229,7 @@ phi_i-1_i for i=1 to 6.</dd>
     return p</code></pre>
 </details>
 </dd>
-<dt id="control_func.joint2task"><code class="name flex">
+<dt id="src.control_func.joint2task"><code class="name flex">
 <span>def <span class="ident">joint2task</span></span>(<span>theta: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2272,7 +2272,7 @@ phi_i-1_i for i=1 to 6.</dd>
     return X</code></pre>
 </details>
 </dd>
-<dt id="control_func.phi_hinge"><code class="name flex">
+<dt id="src.control_func.phi_hinge"><code class="name flex">
 <span>def <span class="ident">phi_hinge</span></span>(<span>theta: float) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2313,7 +2313,7 @@ phi_i-1_i for i=1 to 6.</dd>
     return phi_h</code></pre>
 </details>
 </dd>
-<dt id="control_func.phi_link"><code class="name flex">
+<dt id="src.control_func.phi_link"><code class="name flex">
 <span>def <span class="ident">phi_link</span></span>(<span>d: float, a: float, alpha: float) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2365,7 +2365,7 @@ phi_i-1_i for i=1 to 6.</dd>
     return phi_l</code></pre>
 </details>
 </dd>
-<dt id="control_func.pos_from_phi"><code class="name flex">
+<dt id="src.control_func.pos_from_phi"><code class="name flex">
 <span>def <span class="ident">pos_from_phi</span></span>(<span>phi: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2403,7 +2403,7 @@ phi_i-1_i for i=1 to 6.</dd>
     return pos</code></pre>
 </details>
 </dd>
-<dt id="control_func.reverse_sweep"><code class="name flex">
+<dt id="src.control_func.reverse_sweep"><code class="name flex">
 <span>def <span class="ident">reverse_sweep</span></span>(<span>phis: numpy.ndarray, SMs: list, m: list, V: numpy.ndarray, A: numpy.ndarray, g: numpy.ndarray, H: numpy.ndarray, COMs: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2500,7 +2500,7 @@ phi_i-1_i for i=1 to 6.</dd>
     return CG</code></pre>
 </details>
 </dd>
-<dt id="control_func.tilda"><code class="name flex">
+<dt id="src.control_func.tilda"><code class="name flex">
 <span>def <span class="ident">tilda</span></span>(<span>p: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2540,7 +2540,7 @@ operation for a given 3x1 vector.</p>
     return til</code></pre>
 </details>
 </dd>
-<dt id="control_func.tilda6"><code class="name flex">
+<dt id="src.control_func.tilda6"><code class="name flex">
 <span>def <span class="ident">tilda6</span></span>(<span>P: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
@@ -2593,52 +2593,57 @@ Input spatial vector</p>
 <ul></ul>
 </div>
 <ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="src" href="index.html">src</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="two-column">
-<li><code><a title="control_func.COMs" href="#control_func.COMs">COMs</a></code></li>
-<li><code><a title="control_func.H" href="#control_func.H">H</a></code></li>
-<li><code><a title="control_func.IMs" href="#control_func.IMs">IMs</a></code></li>
-<li><code><a title="control_func.SMs" href="#control_func.SMs">SMs</a></code></li>
-<li><code><a title="control_func.a" href="#control_func.a">a</a></code></li>
-<li><code><a title="control_func.a0" href="#control_func.a0">a0</a></code></li>
-<li><code><a title="control_func.alpha" href="#control_func.alpha">alpha</a></code></li>
-<li><code><a title="control_func.alpha0" href="#control_func.alpha0">alpha0</a></code></li>
-<li><code><a title="control_func.d" href="#control_func.d">d</a></code></li>
-<li><code><a title="control_func.m" href="#control_func.m">m</a></code></li>
-<li><code><a title="control_func.phi6_ef" href="#control_func.phi6_ef">phi6_ef</a></code></li>
-<li><code><a title="control_func.theta0" href="#control_func.theta0">theta0</a></code></li>
+<li><code><a title="src.control_func.COMs" href="#src.control_func.COMs">COMs</a></code></li>
+<li><code><a title="src.control_func.H" href="#src.control_func.H">H</a></code></li>
+<li><code><a title="src.control_func.IMs" href="#src.control_func.IMs">IMs</a></code></li>
+<li><code><a title="src.control_func.SMs" href="#src.control_func.SMs">SMs</a></code></li>
+<li><code><a title="src.control_func.a" href="#src.control_func.a">a</a></code></li>
+<li><code><a title="src.control_func.a0" href="#src.control_func.a0">a0</a></code></li>
+<li><code><a title="src.control_func.alpha" href="#src.control_func.alpha">alpha</a></code></li>
+<li><code><a title="src.control_func.alpha0" href="#src.control_func.alpha0">alpha0</a></code></li>
+<li><code><a title="src.control_func.d" href="#src.control_func.d">d</a></code></li>
+<li><code><a title="src.control_func.m" href="#src.control_func.m">m</a></code></li>
+<li><code><a title="src.control_func.phi6_ef" href="#src.control_func.phi6_ef">phi6_ef</a></code></li>
+<li><code><a title="src.control_func.theta0" href="#src.control_func.theta0">theta0</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="control_func.Rx" href="#control_func.Rx">Rx</a></code></li>
-<li><code><a title="control_func.Ry" href="#control_func.Ry">Ry</a></code></li>
-<li><code><a title="control_func.Rz" href="#control_func.Rz">Rz</a></code></li>
-<li><code><a title="control_func.compute_D" href="#control_func.compute_D">compute_D</a></code></li>
-<li><code><a title="control_func.create_IM" href="#control_func.create_IM">create_IM</a></code></li>
-<li><code><a title="control_func.dJ_dt" href="#control_func.dJ_dt">dJ_dt</a></code></li>
-<li><code><a title="control_func.dJ_dt_" href="#control_func.dJ_dt_">dJ_dt_</a></code></li>
-<li><code><a title="control_func.dJi_dt" href="#control_func.dJi_dt">dJi_dt</a></code></li>
-<li><code><a title="control_func.dR_dt" href="#control_func.dR_dt">dR_dt</a></code></li>
-<li><code><a title="control_func.dTe" href="#control_func.dTe">dTe</a></code></li>
-<li><code><a title="control_func.dphih_dq" href="#control_func.dphih_dq">dphih_dq</a></code></li>
-<li><code><a title="control_func.dphis_dq" href="#control_func.dphis_dq">dphis_dq</a></code></li>
-<li><code><a title="control_func.euler2omega_jacobian" href="#control_func.euler2omega_jacobian">euler2omega_jacobian</a></code></li>
-<li><code><a title="control_func.forward_sweep" href="#control_func.forward_sweep">forward_sweep</a></code></li>
-<li><code><a title="control_func.geometric2analytic_jacobian" href="#control_func.geometric2analytic_jacobian">geometric2analytic_jacobian</a></code></li>
-<li><code><a title="control_func.geometric_jacobian" href="#control_func.geometric_jacobian">geometric_jacobian</a></code></li>
-<li><code><a title="control_func.get_DH" href="#control_func.get_DH">get_DH</a></code></li>
-<li><code><a title="control_func.get_SM" href="#control_func.get_SM">get_SM</a></code></li>
-<li><code><a title="control_func.get_cummulative_phi" href="#control_func.get_cummulative_phi">get_cummulative_phi</a></code></li>
-<li><code><a title="control_func.get_phi" href="#control_func.get_phi">get_phi</a></code></li>
-<li><code><a title="control_func.inv_tilda" href="#control_func.inv_tilda">inv_tilda</a></code></li>
-<li><code><a title="control_func.joint2task" href="#control_func.joint2task">joint2task</a></code></li>
-<li><code><a title="control_func.phi_hinge" href="#control_func.phi_hinge">phi_hinge</a></code></li>
-<li><code><a title="control_func.phi_link" href="#control_func.phi_link">phi_link</a></code></li>
-<li><code><a title="control_func.pos_from_phi" href="#control_func.pos_from_phi">pos_from_phi</a></code></li>
-<li><code><a title="control_func.reverse_sweep" href="#control_func.reverse_sweep">reverse_sweep</a></code></li>
-<li><code><a title="control_func.tilda" href="#control_func.tilda">tilda</a></code></li>
-<li><code><a title="control_func.tilda6" href="#control_func.tilda6">tilda6</a></code></li>
+<li><code><a title="src.control_func.Rx" href="#src.control_func.Rx">Rx</a></code></li>
+<li><code><a title="src.control_func.Ry" href="#src.control_func.Ry">Ry</a></code></li>
+<li><code><a title="src.control_func.Rz" href="#src.control_func.Rz">Rz</a></code></li>
+<li><code><a title="src.control_func.compute_D" href="#src.control_func.compute_D">compute_D</a></code></li>
+<li><code><a title="src.control_func.create_IM" href="#src.control_func.create_IM">create_IM</a></code></li>
+<li><code><a title="src.control_func.dJ_dt" href="#src.control_func.dJ_dt">dJ_dt</a></code></li>
+<li><code><a title="src.control_func.dJ_dt_" href="#src.control_func.dJ_dt_">dJ_dt_</a></code></li>
+<li><code><a title="src.control_func.dJi_dt" href="#src.control_func.dJi_dt">dJi_dt</a></code></li>
+<li><code><a title="src.control_func.dR_dt" href="#src.control_func.dR_dt">dR_dt</a></code></li>
+<li><code><a title="src.control_func.dTe" href="#src.control_func.dTe">dTe</a></code></li>
+<li><code><a title="src.control_func.dphih_dq" href="#src.control_func.dphih_dq">dphih_dq</a></code></li>
+<li><code><a title="src.control_func.dphis_dq" href="#src.control_func.dphis_dq">dphis_dq</a></code></li>
+<li><code><a title="src.control_func.euler2omega_jacobian" href="#src.control_func.euler2omega_jacobian">euler2omega_jacobian</a></code></li>
+<li><code><a title="src.control_func.forward_sweep" href="#src.control_func.forward_sweep">forward_sweep</a></code></li>
+<li><code><a title="src.control_func.geometric2analytic_jacobian" href="#src.control_func.geometric2analytic_jacobian">geometric2analytic_jacobian</a></code></li>
+<li><code><a title="src.control_func.geometric_jacobian" href="#src.control_func.geometric_jacobian">geometric_jacobian</a></code></li>
+<li><code><a title="src.control_func.get_DH" href="#src.control_func.get_DH">get_DH</a></code></li>
+<li><code><a title="src.control_func.get_SM" href="#src.control_func.get_SM">get_SM</a></code></li>
+<li><code><a title="src.control_func.get_cummulative_phi" href="#src.control_func.get_cummulative_phi">get_cummulative_phi</a></code></li>
+<li><code><a title="src.control_func.get_phi" href="#src.control_func.get_phi">get_phi</a></code></li>
+<li><code><a title="src.control_func.inv_tilda" href="#src.control_func.inv_tilda">inv_tilda</a></code></li>
+<li><code><a title="src.control_func.joint2task" href="#src.control_func.joint2task">joint2task</a></code></li>
+<li><code><a title="src.control_func.phi_hinge" href="#src.control_func.phi_hinge">phi_hinge</a></code></li>
+<li><code><a title="src.control_func.phi_link" href="#src.control_func.phi_link">phi_link</a></code></li>
+<li><code><a title="src.control_func.pos_from_phi" href="#src.control_func.pos_from_phi">pos_from_phi</a></code></li>
+<li><code><a title="src.control_func.reverse_sweep" href="#src.control_func.reverse_sweep">reverse_sweep</a></code></li>
+<li><code><a title="src.control_func.tilda" href="#src.control_func.tilda">tilda</a></code></li>
+<li><code><a title="src.control_func.tilda6" href="#src.control_func.tilda6">tilda6</a></code></li>
 </ul>
 </li>
 </ul>

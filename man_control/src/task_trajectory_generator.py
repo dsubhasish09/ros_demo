@@ -4,6 +4,9 @@
 Created on Sat Jun 12 00:19:46 2021
 
 @author: dsubhasish
+
+This is a basic task space trajectory generator which can be used as a template to
+create more complex trajectory generators.
 """
 
 
@@ -18,8 +21,38 @@ from geometry_msgs.msg import PoseStamped
 
 class Task_Traj_Gen(object):
     """
-    This class implements a desired task space trajectory generator which commands a trajectory 
-    resembling infinity symbol
+    This class implements a minimal desired task space trajectory generator.
+    
+    The trajectory generated resembles an infinity symbol. This is achieved by 
+    dividing the time period into five segments (straight line, circular arc, 
+    straight line, circular arc and straight line), and then computing the 
+    trajectory accordingly as per the current time segment. This is then repeated
+    by resetting the time period.
+    
+    Attributes
+    ----------
+    traj : Float64MultiArray
+        The computed trajectory will be transferred to this message type for publishing
+    trajd : np.ndarray of shape (18,1)
+        Desired trajectory
+    trajd : np.ndarray of shape (18,1)
+        Starting point for the trajectory
+    traj_pub : rospy.Publisher
+        Publisher of desired task trajectory topic (/task_desired).
+    visualize : bool
+        Whether or not additional topics should be published for visualization in RViz
+    point_marker : Marker
+        RViz visualization marker representing the desired tool tip point
+    point_pub : rospy.Publisher
+        Publisher for sending desired tool tip point to RViz over the topic /desired_tool_tip
+    point_marker1 : Marker
+        RViz visualization marker representing the desired tool tip direction
+    point_pub1 : rospy.Publisher
+        Publisher for sending desired tool tip direction to RViz over the topic /desired_tool_direction
+    pose_msg : PoseStamped()
+        Message for sending desired tool tip pose. 
+    pose_pub : rospy.Publisher
+        Publisher for sending desired tool tip pose to RViz over the topic /desired_tool_pose
     """
     def __init__(self,visualize=True):
         """
@@ -102,6 +135,17 @@ class Task_Traj_Gen(object):
             self.pose_pub=rospy.Publisher('desired_tool_pose', PoseStamped, queue_size=1, latch=True)
             
     def publish_traj(self):
+        """
+        Starts the trajectory computation and publishing loop. Splits the time period into five segments
+        and computes the desired trajectory accordingly. The magnitude of velocity and orientation
+        is kept constant over the entire desired trajectory. The computed trajectory is then published to
+        /task_desired topic.
+
+        Returns
+        -------
+        None.
+
+        """        
         r=rospy.Rate(200)#rate at which to publish
         t0=rospy.get_time()
         rospy.sleep(0.005)
@@ -126,34 +170,34 @@ class Task_Traj_Gen(object):
         while not rospy.is_shutdown():
             t_=rospy.get_time()
             t=t_-t0
-            #split trajectory to four segments depending on the current time
+            #split trajectory to five segments depending on the current time
             #and then use conditionals to compute the trajectory during 
             #these segments
-            if t<1:
+            if t<1:#straight line
                 p=t*(R(pi/4) @ np.array([[-0.3,0]]).T)
                 dp=R(pi/4) @ np.array([[-0.3,0]]).T*1
                 ddp=np.zeros((2,1))
-            elif t>=1 and t<1+3*pi/2:
+            elif t>=1 and t<1+3*pi/2:#circular arc
                 theta0=2*pi-pi/4
                 theta=theta0-(t-1)
                 p=0.3*np.array([[cos(theta),sin(theta)]]).T+np.array([[-np.sqrt(2)*0.3,0]]).T
                 dp=0.3*np.array([[-sin(theta),cos(theta)]]).T*-1
                 ddp=0.3*np.array([[-cos(theta),-sin(theta)]]).T*-1*-1
-            elif t>=1+3*pi/2 and t<3+3*pi/2:
+            elif t>=1+3*pi/2 and t<3+3*pi/2:#straight line
                 p=np.array([[-0.3/np.sqrt(2),0.3/np.sqrt(2)]]).T+R(-pi/4) @ np.array([[0.3,0]]).T*(t-1-3*pi/2);
                 dp=R(-pi/4) @ np.array([[0.3,0]]).T*1
                 ddp=np.zeros((2,1))
-            elif t>=3+3*pi/2 and t<3+3*pi:
+            elif t>=3+3*pi/2 and t<3+3*pi:#circular arc
                 theta0=pi+pi/4
                 theta=theta0+(t-3-3*pi/2)
                 p=0.3*np.array([[cos(theta),sin(theta)]]).T+np.array([[np.sqrt(2)*0.3,0]]).T
                 dp=0.3*np.array([[-sin(theta),cos(theta)]]).T*1
                 ddp=0.3*np.array([[-cos(theta),-sin(theta)]]).T*1*1
-            elif t>=3+3*pi and t<4+3*pi:
+            elif t>=3+3*pi and t<4+3*pi:#straight line
                 p=np.array([[0.3/np.sqrt(2),0.3/np.sqrt(2)]]).T+R(pi/4) @ np.array([[-0.3,0]]).T*(t-3-3*pi);
                 dp=R(pi/4) @ np.array([[-0.3,0]]).T*1
                 ddp=np.zeros((2,1))
-            else:
+            else:#reset time period
                 t0=rospy.get_time()
             #need to be scaled by 0.9 because initial coordinates are out of reach    
             p=0.9*p
