@@ -1,6 +1,5 @@
 # ros_demo
 These are demo packages for testing new ideas in ROS. The structure of the packages are as follows-
-'''
 .
 |-- README.md
 |-- man_control
@@ -67,4 +66,3 @@ These are demo packages for testing new ideas in ROS. The structure of the packa
     |   |-- man_urdf.csv
     |   `-- man_urdf.urdf
     `-- urdf.rviz
-    '''
