@@ -3,7 +3,11 @@
 """
 Created on Sun Mar 29 20:31:07 2020
 
-@author: kuttus09
+@author: dsubhasish
+
+This file has a basic implementation of the joint space inverse dynamics controller.
+This can be used as a template for creating more complex controllers.
+
 """
 
 

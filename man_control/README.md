@@ -8,9 +8,8 @@ man_control
 │   └── recording.bag
 ├── config
 │   └── control.yaml
-├── include
-│   └── man_control
 ├── launch
+│   ├── README.md
 │   ├── control.launch
 │   ├── display.launch
 │   ├── display_bag.launch
@@ -21,6 +20,7 @@ man_control
 ├── rviz
 │   └── urdf.rviz
 ├── src
+│   ├── README.md
 │   ├── change_sim_speed.py
 │   ├── control_func.py
 │   ├── docs
@@ -39,7 +39,6 @@ man_control
 │   ├── task_controller.py
 │   └── task_trajectory_generator.py
 └── urdf
-    ├── man_controk.urdf
     ├── man_control.xacro
     └── template.xacro
 </pre>

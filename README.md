@@ -5,13 +5,13 @@ ros_demo
 ├── README.md
 ├── man_control
 │   ├── CMakeLists.txt
+│   ├── README.md
 │   ├── bagfiles
 │   │   └── recording.bag
 │   ├── config
 │   │   └── control.yaml
-│   ├── include
-│   │   └── man_control
 │   ├── launch
+│   │   ├── README.md
 │   │   ├── control.launch
 │   │   ├── display.launch
 │   │   ├── display_bag.launch
@@ -22,6 +22,7 @@ ros_demo
 │   ├── rviz
 │   │   └── urdf.rviz
 │   ├── src
+│   │   ├── README.md
 │   │   ├── change_sim_speed.py
 │   │   ├── control_func.py
 │   │   ├── docs
@@ -40,15 +41,11 @@ ros_demo
 │   │   ├── task_controller.py
 │   │   └── task_trajectory_generator.py
 │   └── urdf
-│       ├── man_controk.urdf
 │       ├── man_control.xacro
-│       ├── template.xacro
-│       └── urdf.rviz
+│       └── template.xacro
 └── man_urdf
     ├── CMakeLists.txt
     ├── README.md
-    ├── config
-    │   └── joint_names_man_urdf.yaml
     ├── export.log
     ├── launch
     │   ├── display.launch

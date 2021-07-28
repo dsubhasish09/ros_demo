@@ -4,8 +4,7 @@ This package has the URDF for the puma type 6 DOF serial link manipulator. The p
 man_urdf
 ├── CMakeLists.txt
 ├── README.md
-├── config
-│   └── joint_names_man_urdf.yaml
+├── export.log
 ├── launch
 │   ├── display.launch
 │   └── gazebo.launch
