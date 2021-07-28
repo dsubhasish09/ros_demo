@@ -1,7 +1,7 @@
 # ros_demo
 These are demo packages for testing new ideas in ROS. The structure of the packages are as follows-
-'''bash
-.
+'''
+ros_demo
 ├── README.md
 ├── man_control
 │   ├── CMakeLists.txt
