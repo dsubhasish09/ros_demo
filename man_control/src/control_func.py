@@ -226,6 +226,12 @@ def get_phi(alpha:np.ndarray,a:np.ndarray,theta0:np.ndarray,theta:np.ndarray,d:n
     phis : numpy.ndarray of shape (6,6,6)
          array of Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
         phi_i-1_i for i=1 to 6. 
+    phis_l : numpy.ndarray of shape (6,6,6)
+         array of link Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+        phi_i-1_i for i=1 to 6.
+    phis_h : numpy.ndarray of shape (6,6,6)
+         array of hinge Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+        phi_i-1_i for i=1 to 6.
     """
 
     phis_l=np.zeros((6,6,6))

@@ -259,6 +259,12 @@ def get_phi(alpha:np.ndarray,a:np.ndarray,theta0:np.ndarray,theta:np.ndarray,d:n
     phis : numpy.ndarray of shape (6,6,6)
          array of Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
         phi_i-1_i for i=1 to 6. 
+    phis_l : numpy.ndarray of shape (6,6,6)
+         array of link Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+        phi_i-1_i for i=1 to 6.
+    phis_h : numpy.ndarray of shape (6,6,6)
+         array of hinge Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+        phi_i-1_i for i=1 to 6.
     &#34;&#34;&#34;
 
     phis_l=np.zeros((6,6,6))
@@ -2126,6 +2132,12 @@ phi_i-1_6 for i=1 to 6.</dd>
 <dt><strong><code>phis</code></strong> :&ensp;<code>numpy.ndarray</code> of <code>shape (6,6,6)</code></dt>
 <dd>array of Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
 phi_i-1_i for i=1 to 6.</dd>
+<dt><strong><code>phis_l</code></strong> :&ensp;<code>numpy.ndarray</code> of <code>shape (6,6,6)</code></dt>
+<dd>array of link Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+phi_i-1_i for i=1 to 6.</dd>
+<dt><strong><code>phis_h</code></strong> :&ensp;<code>numpy.ndarray</code> of <code>shape (6,6,6)</code></dt>
+<dd>array of hinge Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+phi_i-1_i for i=1 to 6.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -2156,6 +2168,12 @@ phi_i-1_i for i=1 to 6.</dd>
     phis : numpy.ndarray of shape (6,6,6)
          array of Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
         phi_i-1_i for i=1 to 6. 
+    phis_l : numpy.ndarray of shape (6,6,6)
+         array of link Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+        phi_i-1_i for i=1 to 6.
+    phis_h : numpy.ndarray of shape (6,6,6)
+         array of hinge Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+        phi_i-1_i for i=1 to 6.
     &#34;&#34;&#34;
 
     phis_l=np.zeros((6,6,6))

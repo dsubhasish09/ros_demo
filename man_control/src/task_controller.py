@@ -3,7 +3,11 @@
 """
 Created on Tue Jun  1 21:39:56 2021
 
-@author: devduttsubhasish
+@author: dsubhasish
+
+The class defined here can be used as a template for writing code for more 
+complex task space controllers. Currently no constraints have been applied. 
+This will be changed in future versions.
 """
 import numpy as np
 import rospy
@@ -15,22 +19,91 @@ import time
 import matplotlib.pyplot as plt
 
 class Task_Controller(object):
+    """A bare bones implementation of a task space controller
+    
+    This controller object receives current joint state messages from 
+    /manipulator/joint_states topic and the desired task space trajectory from 
+    the /task_desired topic. It then computes the command torque and sends it
+    to Gazebo through the /manipulator/group_effort_controller/command topic.
+
+    Attributes
+    ----------
+    joint_state : JointState
+        Current joint state received from Gazebo.
+    theta : np.ndarray of shape (6,1)
+        Current joint angle vector.
+    dtheta : np.ndarray of shape (6,1)
+        Current joint velocity vector
+    traj_sub : rospy.Subscriber
+        Subscriber of desired joint trajectory topic (/task_desired).
+    joint_state_sub : rospy.Subscriber
+        Subscriber of current joint state topic (/manipulator/joint_states).
+    torque_pub : rospy.Publisher
+        Publisher of computed command torque to the /manipulator/group_effort_controller/command topic.
+    Kp : float
+        Kp gain.
+    Kd : float
+        Kd gain.
+    phis : np.ndarray of shape (6,6,6)
+        array of Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+        phi_i-1_i for i=1 to 6. 
+    phis_l : int
+        Frequency at which to publish command torque. Reciprocal of control sampling interval
+    cphis : numpy.ndarray of shape (6,6,6)
+        array of Cummulative Rigid body transformation matrices. cphis[0] to cphis[5] are the cummulative rigid body transformation matrices
+        phi_i-1_6 for i=1 to 6. 
+    task_spatial_pos : np.ndarray of shape (6,1)
+        Current task space position
+    task_spatial_vel : np.ndarray of shape (6,1)
+        Current task space velocity
+    Ja_ : np.ndarray of shape (6,6)
+        Regularized analytic jacobian
+    Ja_inv : np.ndarray of shape (6,6)
+        Jacobian pseudo inverse
+    Ja : np.ndarray of shape (6,6)
+        Unregularized analytic jacobian
+    Jad : np.ndarray of shape (6,6)
+        Time derivative of analytic jacobian
+    f : float
+        Torque publishing frequency
+    Xd : np.ndarray of shape (6,1)
+        Desired task space position
+    dXd : np.ndarray of shape (6,1)
+        Desired task space velocity
+    ddXd : np.ndarray of shape (6,1)
+        Desired task space acceleration
+    Tc : np.ndarray of shape (6,1)
+        Command torque
+    msg : Float64MultiArray
+        Torque message to be published
+    D : np.ndarray of shape (6,6)
+        Joint Space Inertia Matrix
+    CG : np.ndarray of shape (6,1)
+        Vector of centrifugal, coriolis and gravity forces
+    Bt : np.ndarray of shape (6,1)
+        Task to be performed
+    qdd : np.ndarray of shape (6,1)
+        Commanded joint space acceleration
+    V : list
+        list of spatial velocities
+    A : list
+        list of spatial accelerations
+    g : list
+        list of spatial gravity
+    """
+    
     def __init__(self,Kp=100,Kd=20,f=200):
         """
-        
-
         Parameters
         ----------
         Kp : TYPE, float
-            DESCRIPTION. The default is 100.
+             The default is 100.
         Kd : TYPE, float
-            DESCRIPTION. The default is 20.
+             The default is 20.
         f : TYPE, float
-            DESCRIPTION. The default is 200.Frequency at which to publish torque
-        -------
-        None.
-
+             The default is 200.Frequency at which to publish torque
         """
+        
         self.Kp=Kp
         self.Kd=Kd
         self.joint_state=JointState()#stores joint state message
@@ -84,8 +157,8 @@ class Task_Controller(object):
 
         Parameters
         ----------
-        msg : TYPE JointState
-            DESCRIPTION. Message received on /hhumanoid/joint_states
+        msg : JointState
+             Message received on /hhumanoid/joint_states
 
         Returns
         -------
@@ -103,8 +176,8 @@ class Task_Controller(object):
 
         Parameters
         ----------
-        msg : TYPE Float64MultiArray
-            DESCRIPTION. message within the desired task space trajectory topic
+        msg : Float64MultiArray
+             message within the desired task space trajectory topic
 
         Returns
         -------
@@ -118,7 +191,15 @@ class Task_Controller(object):
 
     def compute_torque(self):
         """
-        Carries out one iteration of command torque computation
+        Carries out one iteration of command torque computation.
+        
+        Takes current joint space position and velocity, uses it to get the rigid 
+        body transformation matrices and calculate the Analytical Jacobian and its 
+        time derivative. The Jacobian matrix is then regularized and its pseudo-
+        inverse is taken.The required task to be performed is then computed, and 
+        using the pseudo inverse of the Jacobian, the required joint space acceleration
+        is obtained. The command torque is finally obtained by means of inverse 
+        dynamics.
 
         Returns
         -------
@@ -167,15 +248,17 @@ class Task_Controller(object):
 
         Parameters
         ----------
-        A : TYPE numpy.ndarray
-            DESCRIPTION. input matrix
-        cond : TYPE float
-            DESCRIPTION. threshold condition number
+        A : numpy.ndarray
+             input matrix
+        cond : float
+             threshold condition number
 
         Returns
         -------
-        A_ : TYPE numpy.ndarray
-            DESCRIPTION. regularized matrix
+        A_ : numpy.ndarray
+             regularized matrix
+        A_pinv: numpy.ndarray
+            pseudo inverse of regularized matrix
 
         """
         U,S,Vt=np.linalg.svd(A)
@@ -199,15 +282,15 @@ class Task_Controller(object):
 
         Parameters
         ----------
-        Xg : TYPE numpy.ndarray
-            DESCRIPTION. goal task space coordinate/desired task space coordinate
-        Xs : TYPE numpy.ndarray
-            DESCRIPTION. start task space coordinate/current task space coordinate
+        Xg : numpy.ndarray
+             goal task space coordinate/desired task space coordinate
+        Xs : numpy.ndarray
+             start task space coordinate/current task space coordinate
 
         Returns
         -------
-        Xd : TYPE numpy.ndarray
-            DESCRIPTION. difference between task space coordinates Xg and Xs as per the control scheme.
+        Xd : numpy.ndarray
+             difference between task space coordinates Xg and Xs as per the control scheme.
 
         """
         Xd=Xg-Xs
@@ -220,6 +303,15 @@ class Task_Controller(object):
         return Xd
 
     def control_loop(self):
+        """
+        Carries out one iteration of torque computation, followed by publishing
+        the torque to /manipulator/group_effort_controller/command.
+
+        Returns
+        -------
+        None.
+
+        """
         r=rospy.Rate(self.f)
 
         while not rospy.is_shutdown():
@@ -234,12 +326,12 @@ class Task_Controller(object):
     
     def get_time(self):
         """
-        helper function to get current time
+        helper function to get current time from the joint state
 
         Returns
         -------
-        t : TYPE float
-            DESCRIPTION. current time
+        t : float
+             current time
 
         """
         header=self.joint_state.header
