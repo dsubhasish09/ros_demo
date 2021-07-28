@@ -29,7 +29,5 @@ In the above tree, <b>package.xml</b> and <b>CMakeLists.txt</b> are used to defi
 Contains the URDF file.
 ## meshes 
 Contains the stl files corresponding to the visual and collision mesh for the different links of the manipulator.
-## config 
-Contains the yaml file which has the configuration for the controller to be loaded. 
 ## launch 
 Contains launch files to start simulation.
