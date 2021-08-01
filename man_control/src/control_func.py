@@ -202,7 +202,7 @@ def phi_hinge(theta:float)->np.ndarray:
 
 
 def get_phi(alpha:np.ndarray,a:np.ndarray,theta0:np.ndarray,theta:np.ndarray,d:np.ndarray,a0:float,alpha0:float)->np.ndarray:
-    """Returns a list of combined rigid body transformation matrixes for all 12 joints in the Half-humanoid
+    """Returns a 3D arrays of rigid body transformation matrixes for all 6 joints in the Manipulator
 
     Parameters
     ----------
