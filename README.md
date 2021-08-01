@@ -25,16 +25,6 @@ ros_demo
 │   │   ├── README.md
 │   │   ├── change_sim_speed.py
 │   │   ├── control_func.py
-│   │   ├── docs
-│   │   │   └── src
-│   │   │       ├── change_sim_speed.html
-│   │   │       ├── control_func.html
-│   │   │       ├── index.html
-│   │   │       ├── initialize_params.html
-│   │   │       ├── joint_controller.html
-│   │   │       ├── joint_trajectory_generator.html
-│   │   │       ├── task_controller.html
-│   │   │       └── task_trajectory_generator.html
 │   │   ├── initialize_params.py
 │   │   ├── joint_controller.py
 │   │   ├── joint_trajectory_generator.py
@@ -46,7 +36,6 @@ ros_demo
 └── man_urdf
     ├── CMakeLists.txt
     ├── README.md
-    ├── export.log
     ├── launch
     │   ├── display.launch
     │   └── gazebo.launch
