@@ -39,12 +39,12 @@ if __name__=="__main__":
     ode_config=ODEPhysics()
     ode_config.auto_disable_bodies=False
     ode_config.sor_pgs_precon_iters= 0
-    ode_config.sor_pgs_iters= 50
+    ode_config.sor_pgs_iters= 100
     ode_config.sor_pgs_w= 1.3
     ode_config.sor_pgs_rms_error_tol= 0.0
     ode_config.contact_surface_layer= 0.001
     ode_config.contact_max_correcting_vel= 100.0
-    ode_config.cfm: 0.0
-    ode_config.erp: 0.2
-    ode_config.max_contacts: 20
+    ode_config.cfm= 0.0
+    ode_config.erp= 0.2
+    ode_config.max_contacts= 100
     set_phys(time_step,max_update_rate,gravity,ode_config)
