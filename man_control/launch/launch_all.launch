@@ -1,8 +1,7 @@
 <launch>
 <include file="$(find man_control)/launch/gazebo.launch"/>
 <include file="$(find man_control)/launch/control.launch"/>
-<!-- <node name="sim_throttle" pkg="man_control" type="change_sim_speed.py" args="0.2"/> -->
-<node name="sim_throttle" pkg="man_control" type="gazebo_physics_params.py" args="200 0.0001"/>
+<node name="sim_throttle" pkg="man_control" type="gazebo_physics_params.py" args="600 0.001"/>
 <node name="torque_commander" pkg="man_control" type="joint_controller.py"/>
-<node name="recorder" pkg="rosbag" type="record" args="-O $(find man_control)/bagfiles/recording.bag /tf /tf_static /clock /desired_tool_direction /desired_tool_pose /desired_tool_tip"/>
+<!-- <node name="recorder" pkg="rosbag" type="record" args="-O $(find man_control)/bagfiles/recording.bag /tf /tf_static /clock /desired_tool_direction /desired_tool_pose /desired_tool_tip"/> -->
 </launch>

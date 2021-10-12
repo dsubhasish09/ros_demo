@@ -1,3 +1,4 @@
 man_urdf/export.log
 man_control/src/docs/
 man_control/src/__pycache__/
+man_control/bagfiles/recording.bag

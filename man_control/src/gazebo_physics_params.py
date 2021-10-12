@@ -38,7 +38,7 @@ class Gazebo_Physics:
         self.gravity.y=y
         self.gravity.z=z
         
-    def set_physics_ODE(self, auto_disable:bool=False,precon_iters:int=0,iters:int=100,w:float=1.3,rms_error_tol:float=0.0,surface_layer:float=0.001,max_correcting_vel:float=100,cfm:float=0.0,erp:float=0.5,max_contacts:int=100):
+    def set_physics_ODE(self, auto_disable:bool=False,precon_iters:int=0,iters:int=100,w:float=1.3,rms_error_tol:float=0.0,surface_layer:float=0.0001,max_correcting_vel:float=100,cfm:float=0.0,erp:float=1.0,max_contacts:int=100):
         """
         Sets the physics engine to ODE and configures its parameters.
 

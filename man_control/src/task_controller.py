@@ -231,7 +231,7 @@ class Task_Controller(object):
         
         self.Ja_[:,:],self.Ja_inv[:,:]=self.regularize(self.Ja,100)#regularize
         err=self.state_difference(self.Xd,self.task_spatial_pos)#error
-
+        # print(100*np.linalg.norm(err)/np.linalg.norm(self.task_spatial_pos))
         derr=self.dXd-self.task_spatial_vel#derivative error
         #command torque computation
         self.Bt[:,:]=self.ddXd+self.Kd * derr +self.Kp * err-np.matmul(self.Jad,self.dtheta)
@@ -313,13 +313,19 @@ class Task_Controller(object):
 
         """
         r=rospy.Rate(self.f)
-
+        # t=0
+        # i=0
         while not rospy.is_shutdown():
+            # t0=time.process_time()
             self.compute_torque()#compute torque
             self.msg.data=self.Tc[:]#message to be published
             try:
 
                 self.torque_pub.publish(self.msg)#publish
+                # t1=time.process_time()
+                # t+=(t1-t0)
+                # i+=1
+                # print(t/i)
                 r.sleep()
             except:
                 break
