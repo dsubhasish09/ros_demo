@@ -313,12 +313,15 @@ class Task_Controller(object):
 
         """
         r=rospy.Rate(self.f)
-        # t=0
-        # i=0
+        t=0
+        i=0
         while not rospy.is_shutdown():
-            # t0=time.process_time()
+            t0=time.process_time()
             self.compute_torque()#compute torque
+            t+=time.process_time()-t0
+            i+=1
             self.msg.data=self.Tc[:]#message to be published
+            print(t/i)
             try:
 
                 self.torque_pub.publish(self.msg)#publish
