@@ -242,8 +242,7 @@ def get_phi(alpha:np.ndarray,a:np.ndarray,theta0:np.ndarray,theta:np.ndarray,d:n
         else:
             phis_l[i,:,:]=phi_link(d[i,0],a[i-1,0],alpha[i-1,0])
         phis_h[i,:,:]=phi_hinge(theta[i]+theta0[i])
-    phis=phis_l@phis_h
-    return phis,phis_l,phis_h
+    return phis_l@phis_h ,phis_l,phis_h
 
 def get_cummulative_phi(phis:np.ndarray)->np.ndarray:
     """Returns a array of cummulative rigid body transformation matrices.
@@ -437,30 +436,30 @@ def forward_sweep(theta0:np.ndarray,theta:np.ndarray,dtheta:np.ndarray,phis:np.n
     V=np.zeros((6,6,1))
     A=np.zeros((6,6,1))
     g=np.zeros((6,6,1))
-    V0=np.zeros((6,1))
-    A0=np.zeros((6,1))
-    g0=np.zeros((6,1))
+    # V0=np.zeros((6,1))
+    # A0=np.zeros((6,1))
+    # g0=np.zeros((6,1))
     Vk=np.zeros((6,1))
     Ak=np.zeros((6,1))
     gk=np.zeros((6,1))
-    g0[5]=-9.8
+    gk[5]=-9.8
     kak=np.zeros((6,1))
     kwk=np.zeros((3,1))
     for k in np.arange(1,7,1):
-        Vk[:,:]=np.matmul(phis[k-1].T,V0)+H.T*dtheta[k-1]
+        Vk[:,:]=np.matmul(phis[k-1].T,Vk)+H.T*dtheta[k-1]
         kwk[:,:]=(dtheta[k-1]*H.T)[0:3,:]
         kak[0:3,:]=-np.matmul(tilda(kwk),Vk[0:3])
         kak[3:6,:]=-np.matmul(tilda(kwk),Vk[3:6])
-        Ak[:,:]=np.matmul(phis[k-1].T,A0)+kak
-        gk[:,:]=np.matmul(phis[k-1].T,g0)
+        Ak[:,:]=np.matmul(phis[k-1].T,Ak)+kak
+        gk[:,:]=np.matmul(phis[k-1].T,gk)
 
         V[k-1,:,:]=Vk[:,:]
         A[k-1,:,:]=Ak[:,:]
         g[k-1,:,:]=gk[:,:]
         
-        V0[:,:]=Vk[:,:]
-        A0[:,:]=Ak[:,:]
-        g0[:,:]=gk[:,:]
+        # V0[:,:]=Vk[:,:]
+        # A0[:,:]=Ak[:,:]
+        # g0[:,:]=gk[:,:]
         
     return V,A,g
 
@@ -493,7 +492,7 @@ def reverse_sweep(phis:np.ndarray,SMs:list,m:list,V:np.ndarray,A:np.ndarray,g:np
    
     """
     
-    F0=np.zeros((6,1))
+    # F0=np.zeros((6,1))
     CG=np.zeros((6,1))
     
     kbk=np.zeros((6,1))
@@ -511,7 +510,7 @@ def reverse_sweep(phis:np.ndarray,SMs:list,m:list,V:np.ndarray,A:np.ndarray,g:np
     Fk=np.matmul(SMs[5],(A[5]-g[5]))+kbk
     CG[5]=np.matmul(H,Fk)
         
-    F0[:,:]=Fk[:,:]
+    # F0[:,:]=Fk[:,:]
     for k in np.arange(5,0,-1):
         w[:]=V[k-1][0:3,0]
         J[:,:]=SMs[k-1][0:3,0:3]
@@ -520,10 +519,10 @@ def reverse_sweep(phis:np.ndarray,SMs:list,m:list,V:np.ndarray,A:np.ndarray,g:np
         mk=m[k-1]
         kbk[0:3,0]=np.matmul(np.matmul(tilda(w),J),w)+mk*np.matmul(np.matmul(tilda(p),tilda(w)),v)
         kbk[3:6,0]=mk*np.matmul(np.matmul(tilda(w),tilda(w)),p)+mk*np.matmul(tilda(w),v)
-        Fk[:,:]=np.matmul(phis[k],F0)+np.matmul(SMs[k-1],(A[k-1]-g[k-1]))+kbk
+        Fk[:,:]=np.matmul(phis[k],Fk)+np.matmul(SMs[k-1],(A[k-1]-g[k-1]))+kbk
         CG[k-1]=np.matmul(H,Fk)
         
-        F0[:,:]=Fk[:,:]
+        # F0[:,:]=Fk[:,:]
         
     return CG
 
@@ -893,8 +892,8 @@ def dJ_dt(J_:np.ndarray,R06:np.ndarray,phis:np.ndarray,phis_l:np.ndarray,cphis:n
     dJ=dR @ phi6_ef.T @ J_ + R06 @ phi6_ef.T @ dJ_
     return dJ
 
-#initializing kinematic parameters of the half humanoid  
-print("Initializing Kinematic properties of the Half Humanoid") 
+#initializing kinematic parameters of the Manipulator  
+print("Initializing Kinematic properties of the Manipulator") 
 robot = URDF.from_parameter_server() #getting robot description from ROS parameter server
 link_names=np.array([l.name for l in robot.links]) #list of link names
 links=np.array(robot.links) #list of URDF.Link
@@ -928,8 +927,8 @@ phi6_ef[0:3,3:6]=tilda([0,0,0.25722535])
 phi6_ef[0:3,0:3]=phi6_ef[3:6,3:6]=np.eye(3)
 
 
-#initializing mass-inertia properties of the half humanoid
-print("Initializing Mass-Inertia properties of the Half Humanoid")
+#initializing mass-inertia properties of the Manipulator
+print("Initializing Mass-Inertia properties of the Manipulator")
 m=6*[0] #list of link masses
 """list of link masses"""
 COMs=np.zeros((3,6),dtype=np.float64) #list of link centre of mass
