@@ -10,6 +10,7 @@ complex task space controllers. Currently no constraints have been applied.
 This will be changed in future versions.
 """
 import numpy as np
+from numba import jit
 import rospy
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import JointState
@@ -18,6 +19,60 @@ import pickle
 import time
 import matplotlib.pyplot as plt
 
+
+@jit(nopython=True,cache=True)
+def compute_torque(theta,dtheta,Xd,dXd,ddXd,Kd,Kp):
+    """
+    Carries out one iteration of command torque computation.
+    
+    Takes current joint space position and velocity, uses it to get the rigid 
+    body transformation matrices and calculate the Analytical Jacobian and its 
+    time derivative. The Jacobian matrix is then regularized and its pseudo-
+    inverse is taken.The required task to be performed is then computed, and 
+    using the pseudo inverse of the Jacobian, the required joint space acceleration
+    is obtained. The command torque is finally obtained by means of inverse 
+    dynamics.
+
+    Returns
+    -------
+    None.
+
+    """
+    #get current joint state and joint velocity
+    
+    #get rigid body transformation matrices and cumulative rigid body transformation matrices
+    phis,phis_l,_=get_phi(alpha,a,theta0,theta,d,a0,alpha0)
+    cphis=get_cummulative_phi(phis)
+    #rigid body transformation from base frame to end effector frame
+    ef=cphis[0] @ phi6_ef
+    #get current task space coordinate
+    task_spatial_pos=np.concatenate((R2Euler(ef[0:3,0:3]),pos_from_phi(ef)),axis=0)
+    euler=task_spatial_pos[0:3]#get current euler angle
+    Ta_inv=geometric2analytic_jacobian(euler)#matrix to be premultiplied with geometric jacobian
+    J,J_,R06=geometric_jacobian(cphis)#get geometric jacobian
+    Ja_=Ta_inv @ J#analytical jacobian
+
+    Ja=Ja_.copy()#to separate from regularized analytical jacobian
+
+    task_spatial_vel=Ja @ dtheta#current task space velocity
+    Jd=dJ_dt(J_,R06,phis,phis_l,cphis,theta,dtheta,6)#derivative of geometric jacobian
+    deuler=task_spatial_vel[0:3]#euler angle rate
+    dte=dTe(euler,deuler)
+    Jad=Ta_inv @ (Jd-dte @ Ja)#derivative of analytical jacobian
+    
+    Ja_,Ja_inv=regularize(Ja,100)#regularize
+    err=state_difference(Xd,task_spatial_pos)#error
+    # print(100*np.linalg.norm(err)/np.linalg.norm(self.task_spatial_pos))
+    derr=dXd-task_spatial_vel#derivative error
+    #command torque computation
+    Bt=ddXd+Kd * derr +Kp * err-Jad @ dtheta
+    qdd=Ja_inv @ Bt+(np.eye(6)-(Ja_inv @ Ja_)) @ (100-theta+20-dtheta)
+    D=compute_D(SMs, phis,H)
+    V,A,g=forward_sweep(theta0,theta,dtheta,phis,H)
+    CG= reverse_sweep(phis,SMs,m,V,A,g,H,COMs)
+    Tc= D @ qdd +CG
+    return Tc
+    
 class Task_Controller(object):
     """A bare bones implementation of a task space controller
     
@@ -188,119 +243,120 @@ class Task_Controller(object):
         self.Xd[0:6,0]=traj[0:6]
         self.dXd[0:6,0]=traj[6:12]
         self.ddXd[0:6,0]=traj[12:18]
-
-    def compute_torque(self):
-        """
-        Carries out one iteration of command torque computation.
+    
+           
+    # def compute_torque(self):
+    #     """
+    #     Carries out one iteration of command torque computation.
         
-        Takes current joint space position and velocity, uses it to get the rigid 
-        body transformation matrices and calculate the Analytical Jacobian and its 
-        time derivative. The Jacobian matrix is then regularized and its pseudo-
-        inverse is taken.The required task to be performed is then computed, and 
-        using the pseudo inverse of the Jacobian, the required joint space acceleration
-        is obtained. The command torque is finally obtained by means of inverse 
-        dynamics.
+    #     Takes current joint space position and velocity, uses it to get the rigid 
+    #     body transformation matrices and calculate the Analytical Jacobian and its 
+    #     time derivative. The Jacobian matrix is then regularized and its pseudo-
+    #     inverse is taken.The required task to be performed is then computed, and 
+    #     using the pseudo inverse of the Jacobian, the required joint space acceleration
+    #     is obtained. The command torque is finally obtained by means of inverse 
+    #     dynamics.
 
-        Returns
-        -------
-        None.
+    #     Returns
+    #     -------
+    #     None.
 
-        """
-        #get current joint state and joint velocity
-        self.theta[0:6,0],self.dtheta[0:6,0]=self.joint_state.position[0:6],self.joint_state.velocity[0:6]
-        #get rigid body transformation matrices and cumulative rigid body transformation matrices
-        self.phis[:,:,:],self.phis_l[:,:,:],_=get_phi(alpha,a,theta0,self.theta,d,a0,alpha0)
-        self.cphis[:,:,:]=get_cummulative_phi(self.phis)
-        #rigid body transformation from base frame to end effector frame
-        ef=self.cphis[0,:,:] @ phi6_ef
-        #get current task space coordinate
-        self.task_spatial_pos[0:3]=np.array(euler_from_matrix(ef[0:3,0:3],'rzyz')).reshape((3,1))
-        self.task_spatial_pos[3:6]=pos_from_phi(ef)
-        euler=self.task_spatial_pos[0:3]#get current euler angle
-        Ta_inv=geometric2analytic_jacobian(euler)#matrix to be premultiplied with geometric jacobian
-        J,J_,R06=geometric_jacobian(self.cphis)#get geometric jacobian
-        self.Ja_[:,:]=np.matmul(Ta_inv,J)#analytical jacobian
+    #     """
+    #     #get current joint state and joint velocity
+    #     self.theta[0:6,0],self.dtheta[0:6,0]=self.joint_state.position[0:6],self.joint_state.velocity[0:6]
+    #     #get rigid body transformation matrices and cumulative rigid body transformation matrices
+    #     self.phis[:,:,:],self.phis_l[:,:,:],_=get_phi(alpha,a,theta0,self.theta,d,a0,alpha0)
+    #     self.cphis[:,:,:]=get_cummulative_phi(self.phis)
+    #     #rigid body transformation from base frame to end effector frame
+    #     ef=self.cphis[0,:,:] @ phi6_ef
+    #     #get current task space coordinate
+    #     self.task_spatial_pos[0:3]=R2Euler(ef[0:3,0:3])
+    #     self.task_spatial_pos[3:6]=pos_from_phi(ef)
+    #     euler=self.task_spatial_pos[0:3]#get current euler angle
+    #     Ta_inv=geometric2analytic_jacobian(euler)#matrix to be premultiplied with geometric jacobian
+    #     J,J_,R06=geometric_jacobian(self.cphis)#get geometric jacobian
+    #     self.Ja_[:,:]=np.matmul(Ta_inv,J)#analytical jacobian
 
-        self.Ja[:,:]=self.Ja_[:,:]#to separate from regularized analytical jacobian
+    #     self.Ja[:,:]=self.Ja_[:,:]#to separate from regularized analytical jacobian
 
-        self.task_spatial_vel[:,:]=np.matmul(self.Ja,self.dtheta)#current task space velocity
-        Jd=dJ_dt(J_,R06,self.phis,self.phis_l,self.cphis,self.theta,self.dtheta,6)#derivative of geometric jacobian
-        deuler=self.task_spatial_vel[0:3]#euler angle rate
-        dte=dTe(euler,deuler)
-        self.Jad[:,:]=Ta_inv @ (Jd-dte @ self.Ja)#derivative of analytical jacobian
+    #     self.task_spatial_vel[:,:]=np.matmul(self.Ja,self.dtheta)#current task space velocity
+    #     Jd=dJ_dt(J_,R06,self.phis,self.phis_l,self.cphis,self.theta,self.dtheta,6)#derivative of geometric jacobian
+    #     deuler=self.task_spatial_vel[0:3]#euler angle rate
+    #     dte=dTe(euler,deuler)
+    #     self.Jad[:,:]=Ta_inv @ (Jd-dte @ self.Ja)#derivative of analytical jacobian
         
-        self.Ja_[:,:],self.Ja_inv[:,:]=self.regularize(self.Ja,100)#regularize
-        err=self.state_difference(self.Xd,self.task_spatial_pos)#error
-        # print(100*np.linalg.norm(err)/np.linalg.norm(self.task_spatial_pos))
-        derr=self.dXd-self.task_spatial_vel#derivative error
-        #command torque computation
-        self.Bt[:,:]=self.ddXd+self.Kd * derr +self.Kp * err-np.matmul(self.Jad,self.dtheta)
-        self.qdd[:,:]=self.Ja_inv @ self.Bt+(np.eye(6)-(self.Ja_inv @ self.Ja_)) @ (100-self.theta+20-self.dtheta)
-        self.D[:,:]=compute_D(SMs, self.phis,H)
-        self.V[:],self.A[:],self.g[:]=forward_sweep(theta0,self.theta,self.dtheta,self.phis,H)
-        self.CG[:,:]= reverse_sweep(self.phis,SMs,m,self.V,self.A,self.g,H,COMs)
-        self.Tc[:,:]= self.D @ self.qdd +self.CG
+    #     self.Ja_[:,:],self.Ja_inv[:,:]=regularize(self.Ja,100)#regularize
+    #     err=state_difference(self.Xd,self.task_spatial_pos)#error
+    #     # print(100*np.linalg.norm(err)/np.linalg.norm(self.task_spatial_pos))
+    #     derr=self.dXd-self.task_spatial_vel#derivative error
+    #     #command torque computation
+    #     self.Bt[:,:]=self.ddXd+self.Kd * derr +self.Kp * err-np.matmul(self.Jad,self.dtheta)
+    #     self.qdd[:,:]=self.Ja_inv @ self.Bt+(np.eye(6)-(self.Ja_inv @ self.Ja_)) @ (100-self.theta+20-self.dtheta)
+    #     self.D[:,:]=compute_D(SMs, self.phis,H)
+    #     self.V[:],self.A[:],self.g[:]=forward_sweep(theta0,self.theta,self.dtheta,self.phis,H)
+    #     self.CG[:,:]= reverse_sweep(self.phis,SMs,m,self.V,self.A,self.g,H,COMs)
+    #     self.Tc[:,:]= self.D @ self.qdd +self.CG
 
-    def regularize(self,A,cond):
-        """
-        regularizes input matrix A using a modified truncated SVD regularization using
-        cond as the threshold condition number
+    # def regularize(self,A,cond):
+    #     """
+    #     regularizes input matrix A using a modified truncated SVD regularization using
+    #     cond as the threshold condition number
 
-        Parameters
-        ----------
-        A : numpy.ndarray
-             input matrix
-        cond : float
-             threshold condition number
+    #     Parameters
+    #     ----------
+    #     A : numpy.ndarray
+    #          input matrix
+    #     cond : float
+    #          threshold condition number
 
-        Returns
-        -------
-        A_ : numpy.ndarray
-             regularized matrix
-        A_pinv: numpy.ndarray
-            pseudo inverse of regularized matrix
+    #     Returns
+    #     -------
+    #     A_ : numpy.ndarray
+    #          regularized matrix
+    #     A_pinv: numpy.ndarray
+    #         pseudo inverse of regularized matrix
 
-        """
-        U,S,Vt=np.linalg.svd(A)
+    #     """
+    #     U,S,Vt=np.linalg.svd(A)
 
-        S=S[S[0]/S<cond]
+    #     S=S[S[0]/S<cond]
 
-        S_=np.diag(S)
-        n=len(S)
-        A_=np.matmul(U[:,0:n],np.matmul(S_,Vt[0:n,:]))#regularized matrix
+    #     S_=np.diag(S)
+    #     n=len(S)
+    #     A_=np.matmul(U[:,0:n],np.matmul(S_,Vt[0:n,:]))#regularized matrix
 
-        S1=1/S
-        S1_=np.diag(S1)
-        A_pinv=np.matmul(Vt[0:n,:].T,np.matmul(S1_,U[:,0:n].T))
-        return A_,A_pinv
+    #     S1=1/S
+    #     S1_=np.diag(S1)
+    #     A_pinv=np.matmul(Vt[0:n,:].T,np.matmul(S1_,U[:,0:n].T))
+    #     return A_,A_pinv
 
 
-    def state_difference(self,Xg,Xs):
-        """
-        The function which gives the difference between task space coordinates
-        Xg and Xs as per the Euler Angle based scheme.
+    # def state_difference(self,Xg,Xs):
+    #     """
+    #     The function which gives the difference between task space coordinates
+    #     Xg and Xs as per the Euler Angle based scheme.
 
-        Parameters
-        ----------
-        Xg : numpy.ndarray
-             goal task space coordinate/desired task space coordinate
-        Xs : numpy.ndarray
-             start task space coordinate/current task space coordinate
+    #     Parameters
+    #     ----------
+    #     Xg : numpy.ndarray
+    #          goal task space coordinate/desired task space coordinate
+    #     Xs : numpy.ndarray
+    #          start task space coordinate/current task space coordinate
 
-        Returns
-        -------
-        Xd : numpy.ndarray
-             difference between task space coordinates Xg and Xs as per the control scheme.
+    #     Returns
+    #     -------
+    #     Xd : numpy.ndarray
+    #          difference between task space coordinates Xg and Xs as per the control scheme.
 
-        """
-        Xd=Xg-Xs
-        Xde=Xd[0:3]
-        #converting angles greater than pi to equivalent negative angle
-        #done so that the difference indicates the shortest possible path
-        idx=np.abs(Xde)>pi
-        Xde[idx]=-np.sign(Xde[idx])*(2*pi-np.abs(Xde[idx]))
-        Xd[0:3,0]=Xde[0:3,0]
-        return Xd
+    #     """
+    #     Xd=Xg-Xs
+    #     Xde=Xd[0:3]
+    #     #converting angles greater than pi to equivalent negative angle
+    #     #done so that the difference indicates the shortest possible path
+    #     idx=np.abs(Xde)>pi
+    #     Xde[idx]=-np.sign(Xde[idx])*(2*pi-np.abs(Xde[idx]))
+    #     Xd[0:3,0]=Xde[0:3,0]
+    #     return Xd
 
     def control_loop(self):
         """
@@ -313,8 +369,16 @@ class Task_Controller(object):
 
         """
         r=rospy.Rate(self.f)
+        # t=0
+        # i=0
         while not rospy.is_shutdown():
-            self.compute_torque()#compute torque
+            # t0=time.process_time()
+            self.theta[0:6,0],self.dtheta[0:6,0]=self.joint_state.position[0:6],self.joint_state.velocity[0:6]
+            # self.compute_torque()#compute torque
+            self.Tc[:,:]=compute_torque(self.theta,self.dtheta,self.Xd,self.dXd,self.ddXd,self.Kd,self.Kp)
+            # t+=time.process_time()-t0
+            # i+=1
+            # print(t/i)
             self.msg.data=self.Tc[:]#message to be published
             try:
                 self.torque_pub.publish(self.msg)#publish
