@@ -11,7 +11,7 @@ Should be imported individually in every python file.
 """
 
 import numpy as np#numpy
-# cimport numpy as np
+from numba import jit
 import rospy#for interfacing with ROS
 from urdf_parser_py.urdf import URDF#to use URDF from ROS Parameter Server
 from tf.transformations import *#to convert orientations between various conventions
@@ -26,13 +26,14 @@ pi=np.pi
 inv=np.linalg.inv#inverse
 pinv=np.linalg.pinv
 
+@jit(nopython=True,cache=True)
 def tilda(p:np.ndarray)->np.ndarray:
     """Returns the 3x3 skew-symmetric matix corresponding to the cross-product
     operation for a given 3x1 vector.
 
     Parameters
     ----------
-    p : list or numpy.ndarray of shape (3,)
+    p : list or numpy.ndarray of shape (3,1)
          3x1 input vector
 
     Returns
@@ -42,10 +43,10 @@ def tilda(p:np.ndarray)->np.ndarray:
 
     """
     
-    til=np.array([[0,-p[2],p[1]],[p[2],0,-p[0]],[-p[1],p[0],0]],dtype=np.float64)
+    til=np.array([[0,-p[2,0],p[1,0]],[p[2,0],0,-p[0,0]],[-p[1,0],p[0,0],0]])
     return til
 
-
+@jit(nopython=True,cache=True)
 def inv_tilda(til:np.ndarray)->np.ndarray:
     """Inverse function of the tilda function
 
@@ -91,7 +92,8 @@ def tilda6(P:np.ndarray)->np.ndarray:
     til[3:6,0:3]=y_tilda
     return til
 
-def Rx(theta:float)->np.ndarray:
+@jit(nopython=True,cache=True)
+def Rx(theta:np.float64)->np.ndarray:
     """Returns rotation matrix for a rotation about x axis by theta radians
 
     Parameters
@@ -106,11 +108,12 @@ def Rx(theta:float)->np.ndarray:
 
     """
     
-    R=np.array([[1,0,0],
-                [0,cos(theta),-sin(theta)],
-                [0,sin(theta),cos(theta)]],dtype=np.float64)
+    R=np.array([[1.0,0.0,0.0],
+                [0.0,np.cos(theta),-np.sin(theta)],
+                [0.0,np.sin(theta),np.cos(theta)]])
     return R
 
+@jit(nopython=True,cache=True)
 def Ry(theta:float)->np.ndarray:
     """Returns rotation matrix for a rotation about y axis by theta radians
 
@@ -126,11 +129,12 @@ def Ry(theta:float)->np.ndarray:
 
     """
     
-    R=np.array([[cos(theta),0,sin(theta)],
-                [0,1,0],
-                [-sin(theta),0,cos(theta)]],dtype=np.float64)
+    R=np.array([[np.cos(theta),0.0,np.sin(theta)],
+                [0.0,1.0,0.0],
+                [-np.sin(theta),0.0,np.cos(theta)]])
     return R
 
+@jit(nopython=True,cache=True)
 def Rz(theta:float)->np.ndarray:
     """Returns rotation matrix for a rotation about z axis by theta radians
 
@@ -146,116 +150,117 @@ def Rz(theta:float)->np.ndarray:
 
     """
     
-    R=np.array([[cos(theta),-sin(theta),0],
-                [sin(theta),cos(theta),0],
-                [0,0,1]],dtype=np.float64)
+    R=np.array([[np.cos(theta),-np.sin(theta),0.0],
+                [np.sin(theta),np.cos(theta),0.0],
+                [0.0,0.0,1.0]])
     return R
 
+@jit(nopython=True,cache=True)
 def phi_link(d:float,a:float,alpha:float)->np.ndarray:
     """Returns Rigid body transformation matrix corresponding to DH parameters d,a and alpha
 
     Parameters
     ----------
     d : float
-         DH parameter d (joint offset in metres)
+          DH parameter d (joint offset in metres)
     a : float
-         DH parameter a (link length in metres)
+          DH parameter a (link length in metres)
     alpha : float
-         DH parameter alpha (link twist in radians)
+          DH parameter alpha (link twist in radians)
 
     Returns
     -------
     phi_l : numpy.ndarray of shape (6,6)
-         Rigid Body Transformation Matrix
+          Rigid Body Transformation Matrix
 
     """
     
     R=Rx(alpha)
-    l=[a,-d*sin(alpha),d*cos(alpha)]
-    l_tilda=tilda(l)
-    phi_l=np.zeros((6,6),dtype=np.float64)
-    phi_l[0:3,0:3]=R
-    phi_l[0:3,3:6]=np.matmul(l_tilda,R)
-    phi_l[3:6,3:6]=R
+    l_tilda=tilda(np.array([[a,-d*np.sin(alpha),d*np.cos(alpha)]]).T)
+    phi_l=np.zeros((6,6))
+    phi_l[0:3,0:3]=phi_l[3:6,3:6]=R
+    phi_l[0:3,3:6]=l_tilda @ R
+    
     return phi_l
 
+@jit(nopython=True,cache=True)
 def phi_hinge(theta:float)->np.ndarray:
     """Returns Rigid body transformation matrix corresponding to DH parameter theta
 
     Parameters
     ----------
     theta : float
-         DH parameter theta (joint angle in radians)
+          DH parameter theta (joint angle in radians)
 
     Returns
     -------
     phi_h : numpy.ndarray of shape (6,6)
-         Rigid Body Transformation Matrix
+          Rigid Body Transformation Matrix
 
     """
-    
-    R=Rz(theta)
-    phi_h=np.zeros((6,6),dtype=np.float64)
-    phi_h[0:3,0:3]=R
-    phi_h[3:6,3:6]=R
+    phi_h=np.zeros((6,6))
+    phi_h[0:3,0:3]=phi_h[3:6,3:6]=Rz(theta)
     return phi_h
 
-
+@jit(nopython=True,cache=True)
 def get_phi(alpha:np.ndarray,a:np.ndarray,theta0:np.ndarray,theta:np.ndarray,d:np.ndarray,a0:float,alpha0:float)->np.ndarray:
     """Returns a 3D arrays of rigid body transformation matrixes for all 6 joints in the Manipulator
 
     Parameters
     ----------
     alpha : numpy.ndarray of shape (6,1)
-         array of DH parameter alpha for all 6 joints
+          array of DH parameter alpha for all 6 joints
     a : numpy.ndarray of shape (6,1)
-         array of DH parameter a for all 6 joints
+          array of DH parameter a for all 6 joints
     theta0 : numpy.ndarray of shape (6,1)
-         array of DH parameter theta_0 which is the initial joint angle at home position
+          array of DH parameter theta_0 which is the initial joint angle at home position
     theta : numpy.ndarray of shape (6,1)
-         array of DH parameter theta which is to be added to initial joint angle to get total joint angle.
+          array of DH parameter theta which is to be added to initial joint angle to get total joint angle.
     d : numpy.ndarray of shape (6,1)
-         array of DH parameter d for all 6 joints
+          array of DH parameter d for all 6 joints
     a0 : float
-         base link length
+          base link length
     alpha0 : float
-         base link twist
+          base link twist
 
     Returns
     -------
     phis : numpy.ndarray of shape (6,6,6)
-         array of Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+          array of Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
         phi_i-1_i for i=1 to 6. 
     phis_l : numpy.ndarray of shape (6,6,6)
-         array of link Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+          array of link Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
         phi_i-1_i for i=1 to 6.
     phis_h : numpy.ndarray of shape (6,6,6)
-         array of hinge Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
+          array of hinge Rigid body transformation matrices. phis[0] to phis[5] are the rigid body transformation matrices
         phi_i-1_i for i=1 to 6.
     """
 
     phis_l=np.zeros((6,6,6))
     phis_h=np.zeros((6,6,6))
+    phis=np.zeros((6,6,6))
     for i in range(6):
         if i==0 :
-            phis_l[i,:,:]=phi_link(d[i,0],a0,alpha0)
+            phis_l[i]=phi_link(d[i,0],a0,alpha0)
         else:
-            phis_l[i,:,:]=phi_link(d[i,0],a[i-1,0],alpha[i-1,0])
-        phis_h[i,:,:]=phi_hinge(theta[i]+theta0[i])
-    return phis_l@phis_h ,phis_l,phis_h
+            phis_l[i]=phi_link(d[i,0],a[i-1,0],alpha[i-1,0])
+        phis_h[i,:,:]=phi_hinge(theta[i,0]+theta0[i,0])
+        phis[i]=phis_l[i] @ phis_h[i]
+    return phis,phis_l,phis_h
 
+@jit(nopython=True,cache=True)
 def get_cummulative_phi(phis:np.ndarray)->np.ndarray:
     """Returns a array of cummulative rigid body transformation matrices.
 
     Parameters
     ----------
     phis : numpy.ndarray of shape (6,6,6)
-         array of 6 rigid body transformation matrices phi_i-1_i for i=1 to 6
+          array of 6 rigid body transformation matrices phi_i-1_i for i=1 to 6
 
     Returns
     -------
     cphis : numpy.ndarray of shape (6,6,6)
-         array of Cummulative Rigid body transformation matrices. cphis[0] to cphis[5] are the cummulative rigid body transformation matrices
+          array of Cummulative Rigid body transformation matrices. cphis[0] to cphis[5] are the cummulative rigid body transformation matrices
         phi_i-1_6 for i=1 to 6. 
 
     """
@@ -263,10 +268,11 @@ def get_cummulative_phi(phis:np.ndarray)->np.ndarray:
     cphis=np.zeros((6,6,6))
     cphis[5,:,:]=phis[5,:,:]
     for i in [4,3,2,1,0]:
-        cphis[i,:,:]=np.matmul(phis[i,:,:],cphis[i+1,:,:])
+        cphis[i]=phis[i]@cphis[i+1]
         
     return cphis
 
+@jit(nopython=True,cache=True)
 def pos_from_phi(phi:np.ndarray)->np.ndarray:
     """returns the position coordinates from a rigid body transformation matrix
 
@@ -282,9 +288,8 @@ def pos_from_phi(phi:np.ndarray)->np.ndarray:
 
     """
     
-    pos=inv_tilda(np.matmul(phi[0:3,3:6],phi[0:3,0:3].T))
+    pos=inv_tilda(phi[0:3,3:6] @ phi[0:3,0:3].T)
     return pos
-
 
 def create_IM(link)->Tuple[float,np.ndarray,np.ndarray]:
     """Gets the mass-inertia properties of the link from the Robot Description (URDF) loaded in the ROS parameter server
@@ -353,59 +358,96 @@ def get_SM(m:list,COMs:np.ndarray,IMs:list)->list:
 
     """
     
-    SMs=[]
+    SMs=np.zeros((len(m),6,6))
     for i in range(len(m)):
         SM=np.zeros((6,6),dtype=np.float64)
         SM[0:3,0:3]=IMs[i]
-        SM[0:3,3:6]=m[i]*tilda(COMs[:,i])
-        SM[3:6,0:3]=-m[i]*tilda(COMs[:,i])
+        til=tilda(COMs[:,i][:,np.newaxis])
+        SM[0:3,3:6]=m[i]*til
+        SM[3:6,0:3]=-m[i]*til
         SM[3:6,3:6]=m[i]*np.eye(3,dtype=np.float64)
-        SMs.append(SM)
+        SMs[i]=SM
     return SMs    
     
 
-
-def compute_D(SMs:list, phis:np.ndarray,H:np.ndarray)->np.ndarray:
+@jit(nopython=True,cache=True)
+def compute_D(SMs:np.ndarray, phis:np.ndarray,H:np.ndarray)->np.ndarray:
     """returns the 6x6 Joint Space Inertia Matrix D computed using the Composite Rigid Body Algorithm
 
     Parameters
     ----------
     SMs : list
-         list of 6 link spatial inertias 
+          list of 6 link spatial inertias 
     phis : numpy.ndarray of shape (6,6,6)
-         array of 6 rigid body transformation matrices for frames 1 to 6
+          array of 6 rigid body transformation matrices for frames 1 to 6
     H : numpy.ndarray
-         Hinge Map Matrix
+          Hinge Map Matrix
 
     Returns
     -------
     D : numpy.ndarray of shape (6,6)
-         6x6 Joint Space Inertia Matrix
+          6x6 Joint Space Inertia Matrix
 
     """
     
-    D=np.zeros((6,6),dtype=np.float64)
+    D=np.zeros((6,6))
     R=np.zeros((6,6))
     F=np.zeros((6,1))
     R[:,:]=SMs[5]
-    F[:,:]=np.matmul(R,H.T)
-    D[5,5]=np.matmul(H,F)
-    for j in np.arange(4,-1,-1):
-        F[:,:]=np.matmul(phis[j+1],F)
-        D[j,5]=np.matmul(H,F)
-        D[5,j]=D[j,5]
+    F[:,:]=R @ H.T
+    D[5,5]=(H @ F)[0,0]
+    for j in range(4,-1,-1):
+        F[:,:]=phis[j+1] @ F
+        D[j,5]=D[5,j]=(H @ F)[0,0]
             
-    for k in [4,3,2,1,0]:
-        R[:,:]=SMs[k]+np.matmul(np.matmul(phis[k+1],R),phis[k+1].T)
-        F[:,:]=np.matmul(R,H.T)
-        D[k,k]=np.matmul(H,F)
+    for k in range(4,-1,-1):
+        R[:,:]=SMs[k]+phis[k+1] @ R @ phis[k+1].T
+        F[:,:]=R @ H.T
+        D[k,k]=(H @ F)[0,0]
         for j in np.arange(k-1,-1,-1):
-            F[:,:]=np.matmul(phis[j+1],F)
-            D[j,k]=np.matmul(H,F)
-            D[k,j]=D[j,k]
-            
+            F[:,:]=phis[j+1] @ F
+            D[j,k]=D[k,j]=(H @ F)[0,0]            
     return D
 
+def compute_D_(SMs:np.ndarray, phis:np.ndarray,H:np.ndarray)->np.ndarray:
+    """returns the 6x6 Joint Space Inertia Matrix D computed using the Composite Rigid Body Algorithm
+
+    Parameters
+    ----------
+    SMs : list
+          list of 6 link spatial inertias 
+    phis : numpy.ndarray of shape (6,6,6)
+          array of 6 rigid body transformation matrices for frames 1 to 6
+    H : numpy.ndarray
+          Hinge Map Matrix
+
+    Returns
+    -------
+    D : numpy.ndarray of shape (6,6)
+          6x6 Joint Space Inertia Matrix
+
+    """
+    
+    D=np.zeros((6,6))
+    R=np.zeros((6,6))
+    F=np.zeros((6,1))
+    R[:,:]=SMs[5]
+    F[:,:]=R @ H.T
+    D[5,5]=(H @ F)[0,0]
+    for j in range(4,-1,-1):
+        F[:,:]=phis[j+1] @ F
+        D[j,5]=D[5,j]=(H @ F)[0,0]
+            
+    for k in range(4,-1,-1):
+        R[:,:]=SMs[k]+phis[k+1] @ R @ phis[k+1].T
+        F[:,:]=R @ H.T
+        D[k,k]=(H @ F)[0,0]
+        for j in np.arange(k-1,-1,-1):
+            F[:,:]=phis[j+1] @ F
+            D[j,k]=D[k,j]=(H @ F)[0,0]            
+    return D
+
+@jit(nopython=True,cache=True)
 def forward_sweep(theta0:np.ndarray,theta:np.ndarray,dtheta:np.ndarray,phis:np.ndarray,H:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray]:
     """Carries out the forward sweep of the Recursive Newton Euler Algorithm
     
@@ -436,9 +478,7 @@ def forward_sweep(theta0:np.ndarray,theta:np.ndarray,dtheta:np.ndarray,phis:np.n
     V=np.zeros((6,6,1))
     A=np.zeros((6,6,1))
     g=np.zeros((6,6,1))
-    # V0=np.zeros((6,1))
-    # A0=np.zeros((6,1))
-    # g0=np.zeros((6,1))
+
     Vk=np.zeros((6,1))
     Ak=np.zeros((6,1))
     gk=np.zeros((6,1))
@@ -446,24 +486,20 @@ def forward_sweep(theta0:np.ndarray,theta:np.ndarray,dtheta:np.ndarray,phis:np.n
     kak=np.zeros((6,1))
     kwk=np.zeros((3,1))
     for k in np.arange(1,7,1):
-        Vk[:,:]=np.matmul(phis[k-1].T,Vk)+H.T*dtheta[k-1]
+        Vk[:,:]=phis[k-1].T @ Vk+H.T*dtheta[k-1]
         kwk[:,:]=(dtheta[k-1]*H.T)[0:3,:]
-        kak[0:3,:]=-np.matmul(tilda(kwk),Vk[0:3])
-        kak[3:6,:]=-np.matmul(tilda(kwk),Vk[3:6])
-        Ak[:,:]=np.matmul(phis[k-1].T,Ak)+kak
-        gk[:,:]=np.matmul(phis[k-1].T,gk)
+        kak[0:3,:]=-tilda(kwk) @ Vk[0:3]
+        kak[3:6,:]=-tilda(kwk) @ Vk[3:6]
+        Ak[:,:]=phis[k-1].T @ Ak+kak
+        gk[:,:]=phis[k-1].T @ gk
 
         V[k-1,:,:]=Vk[:,:]
         A[k-1,:,:]=Ak[:,:]
-        g[k-1,:,:]=gk[:,:]
-        
-        # V0[:,:]=Vk[:,:]
-        # A0[:,:]=Ak[:,:]
-        # g0[:,:]=gk[:,:]
-        
+        g[k-1,:,:]=gk[:,:]        
     return V,A,g
 
-def reverse_sweep(phis:np.ndarray,SMs:list,m:list,V:np.ndarray,A:np.ndarray,g:np.ndarray,H:np.ndarray,COMs:np.ndarray)->np.ndarray:
+@jit(nopython=True,cache=True)
+def reverse_sweep(phis:np.ndarray,SMs:np.ndarray,m:np.ndarray,V:np.ndarray,A:np.ndarray,g:np.ndarray,H:np.ndarray,COMs:np.ndarray)->np.ndarray:
     """Carries out the forward sweep of the Recursive Newton Euler Algorithm
     
     Parameters
@@ -492,38 +528,34 @@ def reverse_sweep(phis:np.ndarray,SMs:list,m:list,V:np.ndarray,A:np.ndarray,g:np
    
     """
     
-    # F0=np.zeros((6,1))
     CG=np.zeros((6,1))
     
     kbk=np.zeros((6,1))
-    w=np.zeros((3,))
-    p=np.zeros((3,))
-    v=np.zeros((3,))
+    w=np.zeros((3,1))
+    p=np.zeros((3,1))
+    v=np.zeros((3,1))
     J=np.zeros((3,3))
-    w[:]=V[5][0:3,0]
+    w[:]=V[5][0:3]
     J[:,:]=SMs[5][0:3,0:3]
-    p[:]=COMs[:,5]
-    v[:]=V[5][3:6,0]
+    p[:,0]=COMs[:,5]
+    v[:]=V[5][3:6]
     mk=m[5]
-    kbk[0:3,0]=np.matmul(np.matmul(tilda(w),J),w)+mk*np.matmul(np.matmul(tilda(p),tilda(w)),v)
-    kbk[3:6,0]=mk*np.matmul(np.matmul(tilda(w),tilda(w)),p)+mk*np.matmul(tilda(w),v)
-    Fk=np.matmul(SMs[5],(A[5]-g[5]))+kbk
-    CG[5]=np.matmul(H,Fk)
+    kbk[0:3]=tilda(w) @ J @ w+mk*tilda(p) @ tilda(w) @ v
+    kbk[3:6]=mk* tilda(w) @ tilda(w) @ p+mk*tilda(w) @ v
+    Fk=SMs[5] @ (A[5]-g[5])+kbk
+    CG[5]=H @ Fk
         
-    # F0[:,:]=Fk[:,:]
-    for k in np.arange(5,0,-1):
-        w[:]=V[k-1][0:3,0]
+    for k in range(5,0,-1):
+        w[:]=V[k-1][0:3]
         J[:,:]=SMs[k-1][0:3,0:3]
-        p[:]=COMs[:,k-1]
-        v[:]=V[k-1][3:6,0]
+        p[:,0]=COMs[:,k-1]
+        v[:]=V[k-1][3:6]
         mk=m[k-1]
-        kbk[0:3,0]=np.matmul(np.matmul(tilda(w),J),w)+mk*np.matmul(np.matmul(tilda(p),tilda(w)),v)
-        kbk[3:6,0]=mk*np.matmul(np.matmul(tilda(w),tilda(w)),p)+mk*np.matmul(tilda(w),v)
-        Fk[:,:]=np.matmul(phis[k],Fk)+np.matmul(SMs[k-1],(A[k-1]-g[k-1]))+kbk
-        CG[k-1]=np.matmul(H,Fk)
-        
-        # F0[:,:]=Fk[:,:]
-        
+        kbk[0:3]=tilda(w) @ J @ w +mk*tilda(p) @ tilda(w) @ v
+        kbk[3:6]=mk*tilda(w) @ tilda(w) @ p+mk*tilda(w) @ v
+        Fk[:,:]=phis[k] @ Fk+SMs[k-1] @ (A[k-1]-g[k-1])+kbk
+        CG[k-1]=H @ Fk
+               
     return CG
 
 def get_DH(joints:np.ndarray,joint_names:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray]:
@@ -567,20 +599,21 @@ def get_DH(joints:np.ndarray,joint_names:np.ndarray)->Tuple[np.ndarray,np.ndarra
         yaw=joint.origin.rpy[2]
         if i>1:
             a[i-2,0]=x
-            alpha[i-2,0]=-np.arctan2(cos(roll)*sin(pitch)*sin(yaw) - cos(yaw)*sin(roll),cos(pitch)*cos(roll))
+            alpha[i-2,0]=-np.arctan2(np.cos(roll)*np.sin(pitch)*np.sin(yaw) - np.cos(yaw)*np.sin(roll),np.cos(pitch)*np.cos(roll))
             a_=a[i-2,0]
             alpha_=alpha[i-2,0]
         else:
             a_=a0
             alpha_=alpha0
         if alpha_!=0:
-            d[i-1,0]=-y/sin(alpha_)
+            d[i-1,0]=-y/np.sin(alpha_)
         else:
-            d[i-1,0]=z/cos(alpha_)
-        theta0[i-1,0]=-np.arctan2(cos(yaw)*sin(pitch)*sin(roll) - cos(roll)*sin(yaw),cos(pitch)*cos(yaw))
+            d[i-1,0]=z/np.cos(alpha_)
+        theta0[i-1,0]=-np.arctan2(np.cos(yaw)*np.sin(pitch)*np.sin(roll) - np.cos(roll)*np.sin(yaw),np.cos(pitch)*np.cos(yaw))
     
     return a,alpha,d,theta0
 
+@jit(nopython=True,cache=True)
 def euler2omega_jacobian(alpha:float,beta:float,gamma:float)->np.ndarray:
     """returns the 3x3 Jacobian Matrix for converting angular velocities to Euler Angle Rates for the ZYZ Euler Angles
 
@@ -600,12 +633,12 @@ def euler2omega_jacobian(alpha:float,beta:float,gamma:float)->np.ndarray:
 
     """
     
-    Te = np.array([[0, -sin(alpha), cos(alpha)*sin(beta)],
-                     [0, cos(alpha), sin(alpha)*sin(beta)],
-                     [1, 0, cos(beta)]])
+    Te = np.array([[0.0, -np.sin(alpha), np.cos(alpha)*np.sin(beta)],
+                     [0.0, np.cos(alpha), np.sin(alpha)*np.sin(beta)],
+                     [1.0, 0.0, np.cos(beta)]])
     return Te
 
-
+@jit(nopython=True,cache=True)
 def geometric2analytic_jacobian(euler:np.ndarray)->np.ndarray:
     """returns the 6x6 matrix which needs to be post multiplied by the Geometric Jacobian 
     for converting it into Analytical Jacobian for use with ZYZ Euler Angles
@@ -632,6 +665,7 @@ def geometric2analytic_jacobian(euler:np.ndarray)->np.ndarray:
     Ta_inv[0:3,0:3]=Te_inv
     return Ta_inv
 
+@jit(nopython=True,cache=True)
 def geometric_jacobian(cphis:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray]:
     """returns the 6x6 Geometric Jacobian.
 
@@ -647,14 +681,14 @@ def geometric_jacobian(cphis:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray
 
     """
     
-    J_=np.zeros((6,6),dtype=np.float64)
+    J_=np.zeros((6,6))
     R=cphis[0,0:3,0:3]
-    R06=np.zeros((6,6),dtype=np.float64)
+    R06=np.zeros((6,6))
     R06[0:3,0:3]=R06[3:6,3:6]=R
-    J_[0:6,0:5]=np.array([np.matmul(cphis[i,:,:].T,H.T) for i in [1,2,3,4,5]],dtype=np.float64).squeeze().T
-    J_[0:6,5]=(H.T).squeeze()
-    J=np.matmul(R06,np.matmul(phi6_ef.T,J_))
-
+    for i in range(1,6):
+        J_[:,i-1]=(cphis[i].T @ H.T).ravel()
+    J_[:,5]=(H.T).ravel()
+    J=R06 @ phi6_ef.T @ J_ 
     return J,J_,R06
     
 def joint2task(theta:np.ndarray)->np.ndarray:
@@ -680,6 +714,7 @@ def joint2task(theta:np.ndarray)->np.ndarray:
     
     return X
 
+@jit(nopython=True,cache=True)
 def dphis_dq(theta:np.ndarray,phis_l:np.ndarray,n:int=6)->np.ndarray:
     """returns 3D matrix of stacked derivative of rigid body transformation matrices wrt respective joint variable
 
@@ -699,12 +734,13 @@ def dphis_dq(theta:np.ndarray,phis_l:np.ndarray,n:int=6)->np.ndarray:
 
     """
     
-    dphis_h=np.zeros((n,6,6))
+    dphis=np.zeros((n,6,6))
     for j in range(1,n+1):
-        dphis_h[j-1,:,:]=dphih_dq(j,theta[j-1,0])
-    dphis=phis_l @ dphis_h
+        dphis[j-1]=phis_l[j-1] @ dphih_dq(j,theta[j-1,0])
     return dphis
 
+
+@jit(nopython=True,cache=True)
 def dphih_dq(j:int,q:float)->np.ndarray:
     """returns derivative of hinge rigid body transformation matrix wrt the respective joint angle.
 
@@ -721,14 +757,15 @@ def dphih_dq(j:int,q:float)->np.ndarray:
         derivative of hinge rigid body transformation matrix wrt the respective joint angle.
     """   
     
-    theta=q+theta0[j-1]
-    R=np.array([[-sin(theta),-cos(theta),0],
-                [cos(theta),-sin(theta),0],
-                [0,0,0]])
+    theta=q+theta0[j-1,0]
+    R=np.array([[-np.sin(theta),-np.cos(theta),0.0],
+                [np.cos(theta),-np.sin(theta),0.0],
+                [0.0,0.0,0.0]])
     dphi_h=np.zeros((6,6))
     dphi_h[0:3,0:3]=dphi_h[3:6,3:6]=R
     return dphi_h
 
+@jit(nopython=True,cache=True)
 def dTe(euler:np.ndarray,deuler:np.ndarray)->np.ndarray:
     """returns time derivative of Te
 
@@ -752,13 +789,14 @@ def dTe(euler:np.ndarray,deuler:np.ndarray)->np.ndarray:
     dalpha=deuler[0,0]
     dbeta=deuler[1,0]
     dgamma=deuler[2,0]
-    dte=np.array([[0, -cos(alpha)*dalpha, cos(alpha)*cos(beta)*dbeta-sin(alpha)*sin(beta)*dalpha],
-                  [0, -sin(alpha)*dalpha, cos(alpha)*sin(beta)*dalpha+sin(alpha)*cos(beta)*dbeta],
-                  [0, 0, -sin(beta)*dbeta]])
+    dte=np.array([[0.0, -np.cos(alpha)*dalpha, np.cos(alpha)*np.cos(beta)*dbeta-np.sin(alpha)*np.sin(beta)*dalpha],
+                  [0.0, -np.sin(alpha)*dalpha, np.cos(alpha)*np.sin(beta)*dalpha+np.sin(alpha)*np.cos(beta)*dbeta],
+                  [0.0, 0.0, -np.sin(beta)*dbeta]])
     DTE=np.zeros((6,6))
     DTE[0:3,0:3]=dte
     return DTE
 
+@jit(nopython=True)
 def dJi_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int,i:int)->np.ndarray:
     """returns time derivative of i'th column of J_hat
 
@@ -782,8 +820,7 @@ def dJi_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int
     dj_ : np.ndarray
         time derivative of the i'th column of J_hat
 
-    """
-    
+    """    
     phi_p=np.zeros((n-i,1,6))
     phi_p[0]=H
     phi_s=np.zeros((n-i,6,6))
@@ -791,9 +828,47 @@ def dJi_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int
     phi_s[-1]=np.eye(6)
     for k in range(i+1,n):
         phi_p[k-i]=phi_p[k-i-1] @ phis[k-1]
-    dj_=np.sum(dq[i:n] *(phi_p @ dphis[i:n] @ phi_s)[:,0,:],axis=0)
-    return dj_
+    dj_=np.zeros((6,1))
+    for k in range(i,n):
+        dj_+=dq[k,0] * (phi_p[k-i] @ dphis[k] @ phi_s[k-i])
+    return dj_.ravel()
 
+# def dJi_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int,i:int)->np.ndarray:
+#     """returns time derivative of i'th column of J_hat
+
+#     Parameters
+#     ----------
+#     phis : np.ndarray of shape (n,6,6)
+#         3D array of stacked rigid body transformation matrices
+#     dphis : np.ndarray of shape (n,6,6)
+#         3D array of stacked derivative of rigid body transformation matrices wrt respective joint variable
+#     cphis : np.ndarray of shape (n,6,6)
+#         3D array of stacked cummulative rigid body transformation matrices
+#     dq : np.ndarray of shape (n,1)
+#         array of current joint velocities
+#     n : int
+#         Number of DOF.
+#     i : int
+#         column number.
+
+#     Returns
+#     -------
+#     dj_ : np.ndarray
+#         time derivative of the i'th column of J_hat
+
+#     """
+    
+#     phi_p=np.zeros((n-i,1,6))
+#     phi_p[0]=H
+#     phi_s=np.zeros((n-i,6,6))
+#     phi_s[0:-1]=cphis[i+1:n]
+#     phi_s[-1]=np.eye(6)
+#     for k in range(i+1,n):
+#         phi_p[k-i]=phi_p[k-i-1] @ phis[k-1]
+#     dj_=np.sum(dq[i:n] *(phi_p @ dphis[i:n] @ phi_s)[:,0,:],axis=0)
+#     return dj_
+
+@jit(nopython=True,cache=True)
 def dJ_dt_(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int)->np.ndarray:
     """returns time derivative of J_hat
     
@@ -822,6 +897,7 @@ def dJ_dt_(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int
         dJ_[:,i-1]=dJi_dt(phis,dphis,cphis,dq,n,i)
     return dJ_
 
+@jit(nopython=True,cache=True)
 def dR_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int)->np.ndarray:
     """returns time derivative of R0n
 
@@ -852,11 +928,49 @@ def dR_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int)
     R_s=np.zeros((n,3,3))
     R_s[0:-1]=cphis[1:n,0:3,0:3]
     R_s[-1]=np.eye(3)
-    dr= np.sum(dq * (R_p @ dphis[:,0:3,0:3] @ R_s).reshape((n,9)), axis=0).reshape(3,3)
+    dr=np.zeros((3,3))
+    for i in range(n):
+        dr+= dq[i,0] * (R_p[i] @ dphis[i,0:3,0:3] @ R_s[i])
     dR=np.zeros((6,6))
     dR[0:3,0:3]=dR[3:6,3:6]=dr
     return dR
 
+# def dR_dt(phis:np.ndarray,dphis:np.ndarray,cphis:np.ndarray,dq:np.ndarray,n:int)->np.ndarray:
+#     """returns time derivative of R0n
+
+#     Parameters
+#     ----------
+#     phis : np.ndarray of shape (n,6,6)
+#         3D array of stacked rigid body transformation matrices
+#     dphis : np.ndarray of shape (n,6,6)
+#         3D array of stacked derivative of rigid body transformation matrices wrt corresponding joint variable
+#     cphis : np.ndarray of shape (n,6,6)
+#         3D array of stacked cummulative rigid body transformation matrices
+#     dq : np.ndarray of shape (n,1)
+#         array of current joint velocities
+#     n : int
+#         number of DOF.
+
+#     Returns
+#     -------
+#     dR : np.ndarray
+#         time derivative of R0n.
+
+#     """
+    
+#     R_p=np.zeros((n,3,3))
+#     R_p[0]=np.eye(3)
+#     for k in range(1,n):
+#         R_p[k]=R_p[k-1] @ phis[k-1,0:3,0:3]
+#     R_s=np.zeros((n,3,3))
+#     R_s[0:-1]=cphis[1:n,0:3,0:3]
+#     R_s[-1]=np.eye(3)
+#     dr= np.sum(dq * (R_p @ dphis[:,0:3,0:3] @ R_s).reshape((n,9)), axis=0).reshape(3,3)
+#     dR=np.zeros((6,6))
+#     dR[0:3,0:3]=dR[3:6,3:6]=dr
+#     return dR
+
+@jit(nopython=True,cache=True)
 def dJ_dt(J_:np.ndarray,R06:np.ndarray,phis:np.ndarray,phis_l:np.ndarray,cphis:np.ndarray,q:np.ndarray,dq:np.ndarray,n:int)->np.ndarray:
     """returns time derivative of geometric jacobian
 
@@ -892,6 +1006,83 @@ def dJ_dt(J_:np.ndarray,R06:np.ndarray,phis:np.ndarray,phis_l:np.ndarray,cphis:n
     dJ=dR @ phi6_ef.T @ J_ + R06 @ phi6_ef.T @ dJ_
     return dJ
 
+@jit(nopython=True,cache=True)
+def R2Euler(R:np.ndarray)->np.ndarray:
+    beta=np.arctan2(-np.sqrt(1-R[2,2]**2),R[2,2])
+    alpha=np.arctan2(-R[1,2],-R[0,2])
+    gamma=np.arctan2(-R[2,1],R[2,0])
+    return np.array([[alpha,beta,gamma]]).T
+
+@jit(nopython=True,cache=True)
+def regularize(A,cond):
+    """
+    regularizes input matrix A using a modified truncated SVD regularization using
+    cond as the threshold condition number
+
+    Parameters
+    ----------
+    A : numpy.ndarray
+         input matrix
+    cond : float
+         threshold condition number
+
+    Returns
+    -------
+    A_ : numpy.ndarray
+         regularized matrix
+    A_pinv: numpy.ndarray
+        pseudo inverse of regularized matrix
+
+    """
+    U,S,Vt=np.linalg.svd(A)
+
+    S=S[S[0]/S<cond]
+
+    S_=np.diag(S)
+    n=len(S)
+    A_=U[:,0:n] @ S_ @ Vt[0:n,:]#regularized matrix
+
+    S1=1/S
+    S1_=np.diag(S1)
+    A_pinv=Vt[0:n,:].T @ S1_ @ U[:,0:n].T
+    return A_,A_pinv
+
+@jit(nopython=True,cache=True)
+def state_difference(Xg,Xs):
+    """
+    The function which gives the difference between task space coordinates
+    Xg and Xs as per the Euler Angle based scheme.
+
+    Parameters
+    ----------
+    Xg : numpy.ndarray
+         goal task space coordinate/desired task space coordinate
+    Xs : numpy.ndarray
+         start task space coordinate/current task space coordinate
+
+    Returns
+    -------
+    Xd : numpy.ndarray
+         difference between task space coordinates Xg and Xs as per the control scheme.
+
+    """
+    Xd=np.zeros(Xg.shape)
+    for i in range(3):
+        diff=Xg[i,0]-Xs[i,0]
+        if abs(diff)>pi:
+            Xd[i,0]=-np.sign(diff)*(2*pi-abs(diff))
+        else:
+            Xd[i,0]=diff
+    Xd[3:6]=Xg[3:6]-Xs[3:6]
+    # Xd=Xg-Xs
+    # Xde=Xd[0:3]
+    # #converting angles greater than pi to equivalent negative angle
+    # #done so that the difference indicates the shortest possible path
+    # idx=np.abs(Xde)>pi
+    # Xde[idx]=-np.sign(Xde[idx])*(2*pi-np.abs(Xde[idx]))
+    # Xd[0:3,0]=Xde[0:3,0]
+    return Xd
+
 #initializing kinematic parameters of the Manipulator  
 print("Initializing Kinematic properties of the Manipulator") 
 robot = URDF.from_parameter_server() #getting robot description from ROS parameter server
@@ -923,13 +1114,13 @@ a[:,:],alpha[:,:],d[:,:],theta0[:,:]=get_DH(joints,joint_names)#get DH parameter
 phi6_ef=np.zeros((6,6),dtype=np.float64)
 """rigid body transformation matrices from #6 to end effector frame"""
 
-phi6_ef[0:3,3:6]=tilda([0,0,0.25722535])
+phi6_ef[0:3,3:6]=tilda(np.array([[0,0,0.25722535]]).T)
 phi6_ef[0:3,0:3]=phi6_ef[3:6,3:6]=np.eye(3)
 
 
 #initializing mass-inertia properties of the Manipulator
 print("Initializing Mass-Inertia properties of the Manipulator")
-m=6*[0] #list of link masses
+m=np.array(6*[0],dtype=np.float64) #list of link masses
 """list of link masses"""
 COMs=np.zeros((3,6),dtype=np.float64) #list of link centre of mass
 """array of link centre of masses"""
