@@ -23,7 +23,7 @@ ros_demo
 │   │   └── urdf.rviz
 │   ├── src
 │   │   ├── README.md
-│   │   ├── change_sim_speed.py
+│   │   ├── gazebo_physics_params.py
 │   │   ├── control_func.py
 │   │   ├── initialize_params.py
 │   │   ├── joint_controller.py

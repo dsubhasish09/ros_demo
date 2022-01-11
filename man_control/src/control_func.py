@@ -376,46 +376,8 @@ def compute_D(SMs:np.ndarray, phis:np.ndarray,H:np.ndarray)->np.ndarray:
 
     Parameters
     ----------
-    SMs : list
-          list of 6 link spatial inertias 
-    phis : numpy.ndarray of shape (6,6,6)
-          array of 6 rigid body transformation matrices for frames 1 to 6
-    H : numpy.ndarray
-          Hinge Map Matrix
-
-    Returns
-    -------
-    D : numpy.ndarray of shape (6,6)
-          6x6 Joint Space Inertia Matrix
-
-    """
-    
-    D=np.zeros((6,6))
-    R=np.zeros((6,6))
-    F=np.zeros((6,1))
-    R[:,:]=SMs[5]
-    F[:,:]=R @ H.T
-    D[5,5]=(H @ F)[0,0]
-    for j in range(4,-1,-1):
-        F[:,:]=phis[j+1] @ F
-        D[j,5]=D[5,j]=(H @ F)[0,0]
-            
-    for k in range(4,-1,-1):
-        R[:,:]=SMs[k]+phis[k+1] @ R @ phis[k+1].T
-        F[:,:]=R @ H.T
-        D[k,k]=(H @ F)[0,0]
-        for j in np.arange(k-1,-1,-1):
-            F[:,:]=phis[j+1] @ F
-            D[j,k]=D[k,j]=(H @ F)[0,0]            
-    return D
-
-def compute_D_(SMs:np.ndarray, phis:np.ndarray,H:np.ndarray)->np.ndarray:
-    """returns the 6x6 Joint Space Inertia Matrix D computed using the Composite Rigid Body Algorithm
-
-    Parameters
-    ----------
-    SMs : list
-          list of 6 link spatial inertias 
+    SMs : np.ndarray
+          np.ndarray of shape (6,6,6) of spatial inertias
     phis : numpy.ndarray of shape (6,6,6)
           array of 6 rigid body transformation matrices for frames 1 to 6
     H : numpy.ndarray
@@ -460,7 +422,7 @@ def forward_sweep(theta0:np.ndarray,theta:np.ndarray,dtheta:np.ndarray,phis:np.n
     dtheta : numpy.ndarray of shape (6,1)
          array of joint velocities
     phis : numpy.ndarray of shape (6,1)
-         array rigid body transformation matrices for frames 1 to 12
+         array rigid body transformation matrices for frames 1 to 6
     H : numpy.ndarray
          Hinge Map Matrix
 
@@ -559,7 +521,7 @@ def reverse_sweep(phis:np.ndarray,SMs:np.ndarray,m:np.ndarray,V:np.ndarray,A:np.
     return CG
 
 def get_DH(joints:np.ndarray,joint_names:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray]:
-    """Gets the DH parameters from the Robot Description (URDF) loaded in the ROS parameter server
+    """Gets the DH parameters (modified DH) from the Robot Description (URDF) loaded in the ROS parameter server
     
     Parameters
     ----------
@@ -678,6 +640,13 @@ def geometric_jacobian(cphis:np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray
     -------
     J : numpy.ndarray of shape 6x6
          6x6 Geometric Jacobian.
+         
+    J_ : numpy.ndarray of shape 6x6
+         6X6 Jacobian for the velocities in the last joint frame
+         expressed in itself. Useful for computing derivative later.
+    
+    R06 : numpy.ndarray of shape 6x6
+         Rotational Rigid body transformation matrix from frame #6 to frame #0
 
     """
     
@@ -1008,6 +977,20 @@ def dJ_dt(J_:np.ndarray,R06:np.ndarray,phis:np.ndarray,phis_l:np.ndarray,cphis:n
 
 @jit(nopython=True,cache=True)
 def R2Euler(R:np.ndarray)->np.ndarray:
+    """
+    Converts Rotation matrix to ZYZ Euler angle representation
+
+    Parameters
+    ----------
+    R : np.ndarray
+        Rotation matrix.
+
+    Returns
+    -------
+    np.ndarray of shape (3,1)
+        Vector of euler angles(ZYZ current frame).
+
+    """
     beta=np.arctan2(-np.sqrt(1-R[2,2]**2),R[2,2])
     alpha=np.arctan2(-R[1,2],-R[0,2])
     gamma=np.arctan2(-R[2,1],R[2,0])

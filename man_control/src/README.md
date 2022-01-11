@@ -4,7 +4,7 @@ The src subfolder of the man_control package has the python files which deal wit
 This script automates the creation of xacro files, config files and launch files required for starting the simulation in Gazebo and loading the necessary control interfaces for retrieving joint state information from Gazebo and sending command torque messages to Gazebo.
 ## control_func.py
 This file has common functions which will be used across multiple files, classes and files. Also loads up the mass-inertia and kinematic parameters from the URDF. Should be imported individually in every python file.
-## change_sim_speed.py
+## gazebo_physics_params.py
 This script uses one of the services offered by Gazebo, namely /gazebo/set_physics_properties to slow down the rate of simulation update within Gazebo. The idea is to slow down the simulation sufficiently so that the command torque computation can be completed within the simulated control sampling interval.
 ## joint_controller.py
 This file has a basic implementation of the joint space inverse dynamics controller. This can be used as a template for creating more complex controllers.
