@@ -61,4 +61,20 @@ This is the ROS package having the URDF of a puma type 6 DOF serial chain manipu
 ## man_control
 This ROS package contains python files which implement planners, trajectory generators and controllers for the manipulator mentioned above and also launch files to start the simulation on Gazebo or ROS as required
 
+The simulation can be launched via-
 
+```
+roslaunch man_control launch_all.launch
+```
+This starts the simulation in Gazebo with the Joint Space Inverse Dynamics Controller active. In order to shutdown the Joint Space controller and start the Task Space Inverse Dynamics Controller use-
+```
+rosrun man_control task_controller.py
+```
+To start a dummy task space trajectory generator use-
+```
+rosrun man_control task_trajectory_generator.py
+```
+For visualizing in RViz use-
+```
+roslaunch man_control display.launch
+```
